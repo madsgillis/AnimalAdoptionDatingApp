@@ -1,0 +1,30 @@
+# Python specific
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Flask environment variables
+.env
+
+# Node.js specific
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# React build output
+build/
+
+# Logs
+*.log
+
+# IDE specific files
+.vscode/
+.idea/
+
+# OS specific files
+.DS_Store
+Thumbs.db
