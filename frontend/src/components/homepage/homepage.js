@@ -1,19 +1,45 @@
-import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
+import CardGroup from 'react-bootstrap/CardGroup';
+import Button from 'react-bootstrap/Button';
+
+import lincolnImage from '../images/lincoln.jpg';
+import whiskersImage from '../images/whiskers.jpg';
+import LilyImage from '../images/pexels-charles.jpg';
 
 function AnimalCards() {
     return (
-        <Card style={{ width: '18rem' }}>
-            <Card.Img variant="top" src="holder.js/100px180" />
-            <Card.Body>
-                <Card.Title>Card Title</Card.Title>
-                <Card.Text>
-                    Some quick example text to build on the card title and make up the
-                    bulk of the card's content.
-                </Card.Text>
-                <Button variant="primary">Go somewhere</Button>
-            </Card.Body>
-        </Card>
+        <CardGroup>
+            <Card style={{ width: '18rem' }}>
+                <Card.Img variant="top" src={lincolnImage} />
+                <Card.Body>
+                    <Card.Title>Lincoln</Card.Title>
+                    <Card.Text>
+                        Animal information goes here
+                    </Card.Text>
+                    <Button variant="primary">Find out more about me!</Button>
+                </Card.Body>
+            </Card>
+            <Card style={{ width: '18rem' }}>
+                <Card.Img variant="top" src={whiskersImage} />
+                <Card.Body>
+                    <Card.Title>Whiskers</Card.Title>
+                    <Card.Text>
+                        Animal information goes here
+                    </Card.Text>
+                    <Button variant="primary">Find out more about me!</Button>
+                </Card.Body>
+            </Card>
+            <Card style={{ width: '18rem' }}>
+                <Card.Img variant="top" src={LilyImage} />
+                <Card.Body>
+                    <Card.Title>Lily</Card.Title>
+                    <Card.Text>
+                        Animal information goes here
+                    </Card.Text>
+                    <Button variant="primary">Find out more about me!</Button>
+                </Card.Body>
+            </Card>
+        </CardGroup>
     );
 }
 
