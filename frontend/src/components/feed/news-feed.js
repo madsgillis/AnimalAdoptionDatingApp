@@ -20,7 +20,7 @@ const AdoptionPost = ({ animal }) => {
           </div>
         </div>
       </Card.Header>
-      
+
       <Card.Body>
         <div className="mb-3">
           <img
@@ -42,7 +42,7 @@ const AdoptionPost = ({ animal }) => {
           ))}
         </div>
       </Card.Body>
-      
+
       <Card.Footer className="d-flex justify-content-between">
         <Button variant="outline-primary">
           ♥ {animal.likes}
