@@ -3,6 +3,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import AdminTable from './admin-table';
 import '../App.css';
 
+// icons
+import { Plus } from 'react-bootstrap-icons';
+import { MDBBtn } from 'mdb-react-ui-kit';
+
+
 // while hardcoding in data until using database: use imports for images
 import charlesImage from './images/pexels-charles.jpg';
 import lilyImage from './images/Lily.jpg';
@@ -18,19 +23,26 @@ const animalData = [
 
 function Admin() {
     return (
-        <div>
-            <div style={{ marginBottom: '50px' , backgroundColor: '#979feb'}} fluid className="text-black py-3">
-                <head>
-                    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"/>
-                </head>
-                <h1>Admin Page</h1>
-                <p>Edit, upload, and delete pet profiles here</p>
-            </div>
-            <div class="container">
+    <div class="container mt-5 px-2">
+        <h1>Admin Page</h1>
+        <div class="mb-2 d-flex justify-content-between align-items-center" style={{marginTop: '10px'}}>
             <h2 style={{textAlign: 'left' }}>Current Animal Profiles</h2>
-                <AdminTable data={animalData}/>
+            <div class="px-2">
+                <span><i class="fa fa-angle-down"></i></span>
+                <MDBBtn rounded outline style={{
+                    width: '150px', 
+                    height: '50px',
+                }}>
+                    <Plus size={30} color="blue"/>
+                    New Profile 
+                </MDBBtn>
+                <i class="fa fa-ellipsis-h ms-3"></i>
             </div>
         </div>
+    <div>
+        <AdminTable data={animalData}/>
+    </div>
+    </div>
     );
 }
 
