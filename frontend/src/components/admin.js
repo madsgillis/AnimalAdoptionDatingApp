@@ -3,6 +3,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import AdminTable from './admin-table';
 import '../App.css';
 
+// icons
+import { Plus } from 'react-bootstrap-icons';
+import { MDBBtn } from 'mdb-react-ui-kit';
+
 function Admin() {
     const [data, setData] = useState([]);
 
@@ -31,19 +35,26 @@ function Admin() {
     if (data.length === 0) return <p>No data available.</p>;
 
     return (
-        <div>
-            <div style={{ marginBottom: '50px' , backgroundColor: '#979feb'}} fluid className="text-black py-3">
-                <head>
-                    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"/>
-                </head>
-                <h1>Admin Page</h1>
-                <p>Edit, upload, and delete pet profiles here</p>
-            </div>
-            <div class="container">
+    <div class="container mt-5 px-2">
+        <h1>Admin Page</h1>
+        <div class="mb-2 d-flex justify-content-between align-items-center" style={{marginTop: '10px'}}>
             <h2 style={{textAlign: 'left' }}>Current Animal Profiles</h2>
-                <AdminTable data={data}/>
+            <div class="px-2">
+                <span><i class="fa fa-angle-down"></i></span>
+                <MDBBtn rounded outline style={{
+                    width: '150px', 
+                    height: '50px',
+                }}>
+                    <Plus size={30} color="blue"/>
+                    New Profile 
+                </MDBBtn>
+                <i class="fa fa-ellipsis-h ms-3"></i>
             </div>
         </div>
+    <div>
+        <AdminTable data={data}/>
+    </div>
+    </div>
     );
 }
 
