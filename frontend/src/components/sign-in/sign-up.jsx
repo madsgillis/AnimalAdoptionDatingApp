@@ -10,7 +10,7 @@ import {
 
 function SignUp() {
 	return (
-		<MDBContainer className="p-3 my-5 d-flex flex-column w-50">
+		<MDBContainer className="p-3 my-5 d-flex flex-column w-25">
 			<MDBInput
 				wrapperClass="mb-4"
 				label="Username"
