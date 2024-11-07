@@ -5,6 +5,20 @@ import Image from 'react-bootstrap/Image';
 import { Badge } from 'react-bootstrap';
 import '../App.css';
 
+// Import images
+import charlesImage from './images/pexels-charles.jpg';
+import lilyImage from './images/Lily.jpg';
+import FreddyImage from './images/pexels-freddy.jpg';
+import lincolnImage from './images/lincoln.jpg';
+
+// Map image names to image variables
+const imageMapping = {
+    'FreddyImage': FreddyImage,
+    'charlesImage': charlesImage,
+    'lilyImage': lilyImage,
+    'lincolnImage': lincolnImage,
+};
+
 // For status tag customization
 function StatusTag({ status }) {
     const getStatusVariant = (status) => {
@@ -58,12 +72,18 @@ function AdminTable({data}) {
                     </thead>
                     <tbody>
                         {data.map((animal) => (
-                            <tr key={animal.id}>
-                                <td>{animal.id}</td>
-                                <td>{animal.name}</td>
-                                <td> <Image src={animal.photo} width="171" height="180"/></td>
+                            <tr key={animal.animal_id}>
+                                <td>{animal.animal_id}</td>
+                                <td>{animal.animal_name}</td>
+                                <td>
+                                    {imageMapping[animal.photo] ? (
+                                        <img src={imageMapping[animal.photo]} alt={animal.animal_name} style={{ width: '171px', height: '180px' }} />
+                                    ) : (
+                                        <span>No Image</span> // display text if no image is found
+                                    )}
+                                </td>
                                 <td>{animal.species}</td>
-                                <td><StatusTag status={animal.status} /></td>
+                                <td><StatusTag status={animal.availability} /></td>
                                 <td>
                                     <button className="btn btn-info">
                                         <i className="bi bi-eye"></i> View
