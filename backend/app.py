@@ -1,52 +1,55 @@
-# app.py
 from flask import Flask, jsonify, render_template
 from flask_cors import CORS
-from flask_mysqldb import MySQL
+import pymysql.cursors
 
 app = Flask(__name__)
 CORS(app)
 
-app.config['MYSQL_HOST'] = 'animal-adoption-app.cjqaq2ssgxlm.us-east-2.rds.amazonaws.com'
-app.config['MYSQL_USER'] = 'admin'
-app.config['MYSQL_PASSWORD'] = '0BIzTypE1AT2AIk3EfjA'
-app.config['MYSQL_DB'] = 'adoption_app'
+# Database configuration
+db_config = {
+    'host': 'animal-adoption-app.cjqaq2ssgxlm.us-east-2.rds.amazonaws.com',
+    'user': 'admin',
+    'password': '0BIzTypE1AT2AIk3EfjA',
+    'database': 'adoption_app',
+    'cursorclass': pymysql.cursors.DictCursor
+}
 
-mysql = MySQL(app)
+# Create a database connection
+def db_connection():
+    return pymysql.connect(**db_config)
 
-# Test connection with simple query from test table
+# Test connection with a simple query from test table
 @app.route('/test_db', methods=['GET'])
 def test_db_connection():
+    connection = db_connection()
     try:
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * from diagnostic;")
-        result = cur.fetchone()
-        cur.close()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM diagnostic;")
+            result = cursor.fetchone()
         return jsonify({'success': True, 'result': result}), 200
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        connection.close()
 
+# Route to get admin data
 @app.route('/admin', methods=['GET'])
 def get_admin_data():
+    connection = db_connection()
     try:
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT a.animal_id, a.animal_name, a.photo, s.species_desc as species,"
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT a.animal_id, a.animal_name, a.photo, s.species_desc as species,"
                     + "v.avail_desc as availability from Animals as a join Availability v "
                     + "on a.availability = v.avail_id join Species as s on a.species = s.species_id "
                     + "order by a.animal_id;")
-        data = cur.fetchall()
-
-        # Create list of column names in query
-        columns = [desc[0] for desc in cur.description]
-        cur.close()
-
-        # Create a list of dictionaries using column names
-        results = [dict(zip(columns, row)) for row in data]
-        return jsonify(results)
-    
+            data = cursor.fetchall()
+        return jsonify(data), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    finally:
+        connection.close()
 
-# Homepage. Not pulling data yet.
+# Homepage
 @app.route('/')
 def index():
     return ""
