@@ -1,14 +1,14 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import '../App.css';
+import '../../App.css';
 import StatusTag from '../helpers/StatusTag.js'
 
 // Import images
-import charlesImage from './images/pexels-charles.jpg';
-import lilyImage from './images/Lily.jpg';
-import FreddyImage from './images/pexels-freddy.jpg';
-import lincolnImage from './images/lincoln.jpg';
+import charlesImage from '../images/pexels-charles.jpg';
+import lilyImage from '../images/Lily.jpg';
+import FreddyImage from '../images/pexels-freddy.jpg';
+import lincolnImage from '../images/lincoln.jpg';
 
 // Map image names to image variables
 const imageMapping = {
