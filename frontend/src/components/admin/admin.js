@@ -32,6 +32,37 @@ const animalData = [
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
+    /* fetching and posting data */
+    const [data, setData] = useState([]);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                console.log("Fetching data from backend");
+                const response = await fetch('http://127.0.0.1:5000/admin', {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                console.log(response);
+                if (!response.ok) {
+                    throw new Error('Network did not respond');
+                }
+
+                // Parse response as JSON
+                const result = await response.json();
+                console.log("Fetched data:", result);
+                setData(result);
+
+            } catch (error) {
+                console.error('Error fetching data: ', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    if (data.length === 0) return <p>No data available.</p>;
+
     return (
     <div class="container mt-5 px-2">
         <h1>Admin Page</h1>
@@ -54,7 +85,7 @@ const animalData = [
             </CreateProfile>
         </div>
     <div>
-        <AdminTable data={animalData}/>
+        <AdminTable data={data}/>
     </div>
     </div>
     );

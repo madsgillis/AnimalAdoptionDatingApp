@@ -50,5 +50,3 @@ function AdminTable({data}) {
                 </table>
     );
 };
-
-export default AdminTable;
