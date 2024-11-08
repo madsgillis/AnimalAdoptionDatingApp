@@ -13,7 +13,12 @@ function Admin() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('/admin');
+                console.log("Fetching data from backend");
+                const response = await fetch('http://127.0.0.1:5000/admin', {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 console.log(response);
                 if (!response.ok) {
                     throw new Error('Network did not respond');
@@ -21,7 +26,7 @@ function Admin() {
 
                 // Parse response as JSON
                 const result = await response.json();
-                console.log("Fetched data:", result); // Log parsed JSON result
+                console.log("Fetched data:", result);
                 setData(result);
 
             } catch (error) {
