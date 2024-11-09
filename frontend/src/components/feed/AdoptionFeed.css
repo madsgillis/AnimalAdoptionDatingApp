@@ -1,0 +1,22 @@
+.custom-hide-btn {
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    opacity: 0.6 !important;
+    transition: all 0.2s ease !important;
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  
+  button.custom-hide-btn:hover {
+    opacity: 1 !important;
+  }
+  
+  button.custom-hide-btn:focus {
+    box-shadow: none !important;
+  }
