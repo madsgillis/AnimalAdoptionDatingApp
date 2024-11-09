@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Admin from './components/admin/admin';
 import AdoptionFeed from './components/feed/news-feed';
 import AnimalCards from './components/homepage/homepage';
+import SignIn from './components/sign-in/sign-in';
+import SignUp from './components/sign-in/sign-up';
 
 /* routes: adding separate pages for REACT */
 function App() {
@@ -24,6 +26,9 @@ function App() {
                 <li className="nav-item">
                   <Link to={"/news-feed"} className='nav-link'>News Feed</Link>
                 </li>
+                <li className="nav-item">
+                  <Link to={"/sign-in"} className='nav-link'>Sign In</Link>
+                </li>
               </ul>
               {/* search bar */}
               <form className="d-flex" role="search">
@@ -39,6 +44,8 @@ function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/news-feed" element={<AdoptionFeed />} />
           <Route path='/' element={<AnimalCards />} />
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/sign-up" element={<SignUp />} />
         </Routes>
       </div>
     </Router>
