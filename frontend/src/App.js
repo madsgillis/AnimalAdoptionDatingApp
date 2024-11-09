@@ -1,6 +1,6 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import Admin from './components/admin';
+import Admin from './components/admin/admin';
 import AdoptionFeed from './components/feed/news-feed';
 import AnimalCards from './components/homepage/homepage';
 import SignIn from './components/sign-in/sign-in';
