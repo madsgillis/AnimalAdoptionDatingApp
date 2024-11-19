@@ -19,7 +19,7 @@ const imageMapping = {
 };
 
 // display main admin table
-function AdminTable({data}) {
+function AdminTable({data, onEdit}) {
     return (
         <table className="table table-striped table-hover">
                     <thead>
@@ -54,7 +54,7 @@ function AdminTable({data}) {
                                     </button>
                                 </td>
                                 <td>
-                                    <button className="btn btn-primary">
+                                    <button className="btn btn-primary" onClick={() => onEdit(animal)}>
                                         <i className="bi bi-pencil"></i> Edit
                                     </button>
                                 </td>

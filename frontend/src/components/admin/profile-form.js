@@ -2,22 +2,27 @@
 // 1. For using Modal React-Bootstrap: https://react-bootstrap.netlify.app/docs/components/modal/
 // 2. For using Form React-Boostrap: https://react-bootstrap.netlify.app/docs/forms/overview
 // 3. For auto complete React search options: https://www.geeksforgeeks.org/react-suite-autocomplete-combined-with-inputgroup/?ref=oin_asr8
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { AutoComplete, Input} from "rsuite"; 
-import RSuiteInputGroup from 'rsuite/InputGroup';
-import SearchIcon from '@rsuite/icons/Search';
-import { MDBDatepicker } from 'mdb-react-ui-kit';
-
 
 // custom helpers
 import StatusTag from '../helpers/StatusTag.js';
 
-function ProfileForm() {
+function ProfileForm({ formData, setFormData }) {
+    // fill in values if in editing mode
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+          ...prevData,
+          [name]: value
+        }));
+      };
+    
+    
     const statusOptions = ['Available', 'Adopted', 'On Hold', 'Currently Unavailable'];
     const sexOptions = ['Female', 'Male'];
     const dispositionTraitsList = ['Shy', 'Calm', 'Family Friendly', 'Sassy', 'Independent', 'Social', 'Affectionate', 'Loyal', 'Trainable',
@@ -44,12 +49,15 @@ function ProfileForm() {
             {/* Date picker */}
             <Form.Group className="mb-4">
                 <Form.Label>Today's Date</Form.Label>
-                <Form.Control type="date"/>
+                <Form.Control type="date" value={formData.date}
+                            onChange={handleInputChange}/>
             </Form.Group>
+            
             {/* NAME text input */}
             <Form.Group className="mb-4" controlId="formBasicEmail">
                 <Form.Label>Name</Form.Label>
-                <Form.Control type="email" placeholder="Enter name" />
+                <Form.Control type="email" placeholder="Enter name" value={formData.name}
+                            onChange={handleInputChange}/>
             </Form.Group>
             
             {/* ROW: Gender, Age, Species */}
@@ -88,12 +96,14 @@ function ProfileForm() {
                     {/* Species selection  */}
                     <Form.Group as={Col} sm={4} controlId="formBasicEmail">
                         <Form.Label>Species</Form.Label>
-                        <Form.Select defaultValue="Select">
-                            <option>Select</option>
-                            <option value="1">Dog</option>
-                            <option value="2">Cat</option>
-                            <option value="3">Bird</option>
-                            <option value="3">Other</option>
+                        <Form.Select 
+                            value={formData.species} 
+                            onChange={handleInputChange}>
+                            <option value="">Select</option>
+                            <option value="Dog">Dog</option>
+                            <option value="Cat">Cat</option>
+                            <option value="Bird">Bird</option>
+                            <option value="Other">Other</option>
                         </Form.Select>
                     </Form.Group>
             </Row>
@@ -112,6 +122,9 @@ function ProfileForm() {
                         id={`status-${index}`}
                         label={<StatusTag status={status}/>}
                         defaultChecked={index === 0}
+                        value={status} 
+                        checked={formData.availability === status}
+                        onChange={handleInputChange}
                     />
                 </div>
                 ))}
@@ -162,7 +175,10 @@ function ProfileForm() {
             {/* Upload animal photo here */}
             <Form.Group controlId="formFile" className="mb-3">
                 <Form.Label>Profile Picture</Form.Label>
-                <Form.Control type="file" />
+                <Form.Control 
+                    /*type="file"*/ // change back to file once file is in system
+                    value={formData.photo}
+                    onChange={handleInputChange}/>
             </Form.Group>
         </Form>
     );

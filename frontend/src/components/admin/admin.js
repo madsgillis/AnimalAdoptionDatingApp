@@ -11,9 +11,16 @@ import { Plus } from 'react-bootstrap-icons';
 import { MDBBtn, MDBInputGroup, MDBInput, MDBIcon } from 'mdb-react-ui-kit';
 
   function Admin() {
+    // handle states
+    const [editProfileData, setEditProfileData] = useState(null); // Store the profile data for editing
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    const handleEditShow = (profileData) => {
+        setEditProfileData(profileData);  // Set the data for the profile being edited
+        setShow(true); // Open the modal
+    };
 
     /* search bar */
     const [showSearchAlert, setShowSearchAlert] = useState(false);
@@ -92,14 +99,18 @@ import { MDBBtn, MDBInputGroup, MDBInput, MDBIcon } from 'mdb-react-ui-kit';
                     </MDBBtn>
                     <i class="fa fa-ellipsis-h ms-3"></i>
                 <CreateProfile 
-                    show={show} onHide={handleClose} handleClose={handleClose} title="New Profile"
+                    show={show}
+                    handleClose={handleClose}
+                    profileData={editProfileData}  // Pass profile data to modal for editing
+                    title={editProfileData ? "Edit Profile" : "Create Profile"}
+                    /*show={show} onHide={handleClose} handleClose={handleClose} title="New Profile"*/
                     style={{ width: '100%', maxWidth: '1000px', padding: '20px' }}>
                 </CreateProfile>
             </Col>
         </Row>
         
         {/* DISPLAY TABLE */}
-        <AdminTable data={data}/>
+        <AdminTable data={data} onEdit={handleEditShow}/>
     </Container>
     );
 }

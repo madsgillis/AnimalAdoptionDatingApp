@@ -9,7 +9,34 @@ import Form from 'react-bootstrap/Form';
 import ProfileForm from './profile-form';
 import Button from 'react-bootstrap/Button';
 
-function CreateProfile({children, handleClose, show, props}) {
+function CreateProfile({children, handleClose, show, props, profileData}) {
+    console.log("Animal Name:", profileData); 
+
+    const [formData, setFormData] = useState({
+        name: '',
+        species: '',
+        availability: ''
+      });
+    
+      // Update form data when profileData is passed
+      useEffect(() => {
+        if (profileData) {
+          setFormData({
+            name: profileData.animal_name,
+            species: profileData.species,
+            availability: profileData.availability,
+            photo: profileData.photo
+          });
+        } else {
+          setFormData({
+            name: '',
+            species: '',
+            availability: '',
+            photo: ''
+          });
+        }
+      }, [profileData]);  // Will update formData when profileData changes
+
     return(
         <div>
             <Modal show={show} onHide={handleClose} 
@@ -21,7 +48,7 @@ function CreateProfile({children, handleClose, show, props}) {
                     <Modal.Title id="contained-modal-title-vcenter">Create Animal Profile</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <ProfileForm/>
+                    <ProfileForm formData={formData} setFormData={setFormData}/>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>Close</Button>
