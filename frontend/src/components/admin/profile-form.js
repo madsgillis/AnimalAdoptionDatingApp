@@ -21,10 +21,9 @@ function ProfileForm({ formData, setFormData }) {
           [name]: value
         }));
       };
-    
-    
+
     const statusOptions = ['Available', 'Adopted', 'On Hold', 'Currently Unavailable'];
-    const sexOptions = ['Female', 'Male'];
+    const sexOptions = ['F', 'M'];
     const dispositionTraitsList = ['Shy', 'Calm', 'Family Friendly', 'Sassy', 'Independent', 'Social', 'Affectionate', 'Loyal', 'Trainable',
                                 'Energetic', 'Stubborn', 'Protective', 'Working Dog', 'Anxious', 'Attached', 'Vocal', 'Curious', 'Active', 'Playful', 'Adaptable']
 
@@ -56,7 +55,7 @@ function ProfileForm({ formData, setFormData }) {
             {/* NAME text input */}
             <Form.Group className="mb-4" controlId="formBasicEmail">
                 <Form.Label>Name</Form.Label>
-                <Form.Control type="email" placeholder="Enter name" value={formData.name}
+                <Form.Control type="text" placeholder="Enter name" value={formData.name}
                             onChange={handleInputChange}/>
             </Form.Group>
             
@@ -70,10 +69,14 @@ function ProfileForm({ formData, setFormData }) {
                         <div key={`status-${index}`}className="mb-3" style={{ display: 'flex', alignItems: 'center' }}>
                             <Form.Check
                                 inline
-                                name="status"
+                                name="animal_sex"
+                                //name="status"
                                 type="radio"
                                 id={`status-${index}`}
                                 label={status}
+                                value={status} 
+                                checked={formData.animal_sex === status}
+                                onChange={handleInputChange}
                             />
                         </div>
                         ))}
@@ -88,8 +91,10 @@ function ProfileForm({ formData, setFormData }) {
                             placeholder="ex. 5"
                             aria-label="Animal age"
                             aria-describedby="basic-addon2"
-                            />
-                            <InputGroup.Text id="basic-addon2">years old</InputGroup.Text>
+                            value={formData.age}  // Make sure this is properly bound
+                            onChange={handleInputChange}
+                            name="age"/>
+                            <InputGroup.Text id="basic-addon2" >years old</InputGroup.Text>
                         </InputGroup>
                     </Form.Group>
                     
@@ -168,7 +173,10 @@ function ProfileForm({ formData, setFormData }) {
                 <Form.Label>Animal Description</Form.Label>
                 <InputGroup>
                     <InputGroup.Text>Description of Animal</InputGroup.Text>
-                    <Form.Control as="textarea" aria-label="With textarea" />
+                    <Form.Control 
+                        as="textarea"
+                        value={formData.description} 
+                        onChange={handleInputChange}   />
                 </InputGroup>
             </Form.Group>
 
@@ -176,9 +184,14 @@ function ProfileForm({ formData, setFormData }) {
             <Form.Group controlId="formFile" className="mb-3">
                 <Form.Label>Profile Picture</Form.Label>
                 <Form.Control 
-                    /*type="file"*/ // change back to file once file is in system
-                    value={formData.photo}
-                    onChange={handleInputChange}/>
+                    type="file" // change back to file once file is in system
+                    onChange={e => {
+                        const file = e.target.files[0];
+                        setFormData(prevData => ({
+                          ...prevData,
+                          photo: file
+                        }));
+                      }}/>
             </Form.Group>
         </Form>
     );

@@ -20,6 +20,8 @@ const imageMapping = {
 
 // display main admin table
 function AdminTable({data, onEdit}) {
+    console.info('Here is the data:', data)
+
     return (
         <table className="table table-striped table-hover">
                     <thead>

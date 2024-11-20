@@ -47,7 +47,7 @@ def get_admin_data():
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT a.animal_id, a.animal_name, a.photo, s.species_desc as species,
-                v.avail_desc as availability 
+                v.avail_desc as availability, a.animal_sex, a.age, a.date, a.description
                 FROM Animals as a 
                 JOIN Availability v ON a.availability = v.avail_id 
                 JOIN Species as s ON a.species = s.species_id 
@@ -58,6 +58,72 @@ def get_admin_data():
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
+    finally:
+        connection.close()
+
+# update profile on admin page
+@app.route('/admin/edit-profile', methods=['PUT'])
+def update_profile():
+    # Get data from the request
+    data = request.json
+    animal_id = data.get('animal_id')
+    #animal_name = data.get('animal_name')
+    #photo = data.get('photo')
+    #species = data.get('species')
+    #availability = data.get('availability')
+    #animal_sex = data.get('animal_sex')
+    age = data.get('age')
+    #date = data.get('date')
+   # description = data.get('description')
+
+    print("Received data:", data)
+
+    connection = db_connection()
+    try:
+        with connection.cursor() as cursor:
+            # Update the database
+            cursor.execute("""
+                UPDATE Animals
+                SET age = %s
+                WHERE animal_id = %s
+            """, (age, animal_id))
+            
+            connection.commit()  # Commit changes to the database
+
+        return jsonify({"message": "Animal data updated successfully"}), 200
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        connection.close()
+
+# animal_name, photo, species, availability, animal_sex, age, 
+               #   date, description, animal_id
+
+# route to specific animal data (used in fetching for admin table)
+@app.route('/admin/animal/<int:animal_id>', methods=['GET'])
+def get_animal_profile(animal_id):
+    # Connect to the database
+    connection = db_connection()
+    try:
+        with connection.cursor() as cursor:
+            # Query the database for the animal with the given animal_id
+            cursor.execute("SELECT * FROM Animals WHERE animal_id = %s", (animal_id,))
+            animal = cursor.fetchone()
+
+            # If animal is found, return the data
+            if animal:
+                return jsonify({
+                    'animal_id': animal[0],  # animal_id column
+                    'animal_name': animal[1],  # animal_name column
+                    'species': animal[2],  # species column
+                    'availability': animal[3],  # availability column
+                    'animal_sex': animal[4],  # animal_sex column
+                    'age': animal[5],  # age column
+                    'photo': animal[6],  # photo column
+                })
+            else:
+                return jsonify({'error': 'Animal not found'}), 404
     finally:
         connection.close()
 

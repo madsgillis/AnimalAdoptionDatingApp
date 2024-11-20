@@ -9,33 +9,81 @@ import Form from 'react-bootstrap/Form';
 import ProfileForm from './profile-form';
 import Button from 'react-bootstrap/Button';
 
+
 function CreateProfile({children, handleClose, show, props, profileData}) {
     console.log("Animal Name:", profileData); 
+    
+    // updating information once save is hit during edit mode
+    const updateAnimal = async (updatedData) => {
+        try {
+          const response = await fetch('http://127.0.0.1:5000/admin/edit-profile', {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatedData), // Send the updated data as JSON
+          });
+      
+          if (!response.ok) {
+            throw new Error("Failed to update animal data");
+          }
+      
+          const result = await response.json();
+          console.log("Update successful:", result);
+          return result
+      } catch (error) {
+          console.error("Error updating animal data:", error);
+      }
+    };
 
+    const handleSave = () => {
+        // Make sure all the form data is collected
+        const updatedData = {
+            id: formData.animal_id, // Ensure animal_id is included
+            name: formData.animal_name,
+            species: formData.species,
+            availability: formData.availability,
+            animal_sex: formData.animal_sex,
+            age: formData.age,
+            photo: formData.photo,
+            description: formData.description
+        };
+        console.log("Here is updated data:", updatedData);
+    };
+    
+    // Default form data state
     const [formData, setFormData] = useState({
         name: '',
         species: '',
-        availability: ''
-      });
+        availability: '',
+        photo: '',
+        animal_sex: '',
+        age: ''
+    });
     
-      // Update form data when profileData is passed
-      useEffect(() => {
+    useEffect(() => {
         if (profileData) {
-          setFormData({
-            name: profileData.animal_name,
-            species: profileData.species,
-            availability: profileData.availability,
-            photo: profileData.photo
-          });
+            setFormData({
+                id: profileData.animal_id,
+                name: profileData.animal_name,
+                species: profileData.species,
+                availability: profileData.availability,
+                photo: profileData.photo,
+                animal_sex: profileData.animal_sex,
+                age: profileData.age
+            });
         } else {
-          setFormData({
-            name: '',
-            species: '',
-            availability: '',
-            photo: ''
-          });
+            setFormData({
+                id: '',
+                name: '',
+                species: '',
+                availability: '',
+                photo: '',
+                animal_sex: '',
+                age: ''
+            });
         }
-      }, [profileData]);  // Will update formData when profileData changes
+    }, [profileData]);
 
     return(
         <div>
@@ -52,33 +100,14 @@ function CreateProfile({children, handleClose, show, props, profileData}) {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>Close</Button>
-                    <Button variant="primary" onClick={handleClose}>Save changes</Button>
+                    <Button variant="primary" 
+                        onClick={() => {
+                            handleSave();  // Calls the save logic
+                            handleClose(); // Closes the modal
+                        }}>Save changes</Button>
                 </Modal.Footer>
             </Modal>
         </div>
     );
-}
-
+ }
 export default CreateProfile;
-
-
-/*
-const dialogRef = useRef(null);
-        const handleClose = () => {
-            dialogRef.current.close();
-            onClose();
-        }
-
-<dialog ref={dialogRef} open={open} className="create-profile-dialog">
-            <div className="create-profile-header">
-                <h4>Animal Profile</h4>
-                <button onClick={handleClose}> &times;</button>
-            </div>
-            <div className="create-profile-body">
-                {children}
-            </div>
-            <div className="create-profile-footer">
-                <button onClick={handleClose}>Close</button>
-                <button>Save changes</button>
-            </div>
-        </dialog>*/
