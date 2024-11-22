@@ -1,0 +1,165 @@
+
+/* =========================
+
+SEARCH BAR 
+
+============================ */ 
+
+/* search icon button */
+#searchButtonAdminSpan {
+    padding: 0 10px;
+}
+
+/* icon */
+#searchButtonAdminIcon {
+    font-size: 1.5rem;
+    color: black;
+}
+
+#searchButtonAdminIcon:hover {
+    color: #CC0000; /* Change color on hover */
+    transition: color 0.3s ease; /* Smooth transition */
+    transform: scale(1.5);
+}
+
+/* search bar input */
+#searchBarInputAdmin {
+    width: 350px;
+    height: 50px;
+}
+
+
+/* =========================
+
+CREATE PROFILE BUTTON
+
+============================ */ 
+.createProfileButtonAdmin {
+    width: 200px;
+    height: 50px;
+    background-color: #e6005c;
+    color: white;  
+    border-color: pink;
+    width: 200px;
+    height: 50px;        
+}
+
+.createProfileButtonAdmin:hover {
+    background-color: #CC0000;
+}
+
+.createProfileButtonElement {
+    width: 100%;
+    max-width: 1000px;
+    padding: 20px;
+}
+
+
+.paginationTable {
+    width: 100%;
+    display: flex;
+    flex-direction: column; /* Stack items vertically if needed */
+    align-items: center;    /* Center align pagination items */
+    gap: 10px; 
+}
+
+
+/* =========================
+
+Admin table 
+
+============================ */ 
+
+.table th{
+    background-color:black;
+    color: white;
+    border: black solid 1px !important;
+}
+
+.table td{
+    border: black solid 1px !important;
+}
+
+#adminTable {
+    max-height: 600px;  /* scroll */
+    max-width: 1300px;
+    width: 100%;
+    overflow-y: auto;
+}
+
+#adminTableWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%; /* Ensures the wrapper takes up the full width */
+    border: none !important;
+}
+
+/* =========================
+
+Pagination page selection
+
+============================ */ 
+
+
+#paginationWrapper {
+    width: 100%; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5px;
+}
+
+#paginationWrapper .pagination {
+    display: flex;
+    flex-wrap: wrap; 
+    width: 100%; 
+}
+
+#paginationWrapper p {
+    text-align: center; 
+    margin-top: 5px; 
+}
+
+#adminTablePagination {
+    max-width: 1300px;
+    width: 100%;
+}
+
+#paginationTable{
+    background-color: black;
+    color: white;
+    border-color: black;
+}
+
+#paginationTable:hover {
+    background-color: #e6005c;
+    color: white;
+    border-color: black;
+}
+
+
+
+/* =========================
+
+Drop down toggle for row selection
+
+============================ */ 
+#rowSelectionButton {
+    background-color: black;
+    color: white;
+    border-color: black;
+}
+
+
+/* =========================
+
+Animal Photo within Table
+
+============================ */ 
+
+#animalPhotos {
+    width: 70px;
+    height: 80px;
+}
+
