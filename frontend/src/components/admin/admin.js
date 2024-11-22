@@ -5,6 +5,8 @@ import CreateProfile from './create-profile';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Button from 'react-bootstrap/Button';
+import './admin.css'
 
 // icons
 import { Plus } from 'react-bootstrap-icons';
@@ -14,6 +16,14 @@ import { MDBBtn, MDBInputGroup, MDBInput, MDBIcon } from 'mdb-react-ui-kit';
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+
+    // set and save search term to send to table:
+    const [searchTerm, setSearchTerm] = useState(''); // State for the search term
+
+    const handleSearchClick = (term) => {
+        setSearchTerm(term); // Set search term when search button is clicked
+    };
 
     /* search bar */
     const [showSearchAlert, setShowSearchAlert] = useState(false);
@@ -58,48 +68,33 @@ import { MDBBtn, MDBInputGroup, MDBInput, MDBIcon } from 'mdb-react-ui-kit';
         <Row className="mb-4">
             <Col xs={12} md={6}>
                 {/* H2 Title */}
-                <h2 style={{textAlign: 'left' }}>Current Animal Profiles</h2>
+                <h2 style={{textAlign: 'left' }}>Animal Profile Database</h2>
             </Col>
             <Col xs={12} md={4} className="d-flex align-items-center justify-content-md-end">
                 {/* SEARCH BAR */}
                 <MDBInputGroup className="w-100">
-                    <MDBInput placeholder="Search" outline style={{
-                        width: '350px', 
-                        height: '50px',
-                    }}>
-                    </MDBInput>
+                    <MDBInput id="searchBarInputAdmin" placeholder="Search" outline value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}></MDBInput>
                     {/* Heart Icon on the right */}
-                    <span className="input-group-text" style={{ padding: '0 10px' }}>
-                        <i className="bi bi-search-heart" style={{ fontSize: '1.5rem', color: 'red' }} onClick={() => setShowSearchAlert(true)} rippleColor='dark'></i>
+                    <span id="searchButtonAdminSpan" className="input-group-text">
+                        <i id="searchButtonAdminIcon" className="bi bi-search-heart" onClick={() => handleSearchClick(searchTerm)} rippleColor='dark'></i>
                     </span>
                 </MDBInputGroup>
             </Col>
             <Col xs={12} md={2}>
                     {/* CREATE PROFILE BUTTON */}
                     <span><i class="fa fa-angle-down"></i></span>
-                    <MDBBtn style={{
-                        width: '200px', 
-                        height: '50px',
-                        backgroundColor: "#e6005c", // Background color for the button
-                        color: "white",           // Text color
-                        borderColor: 'pink',
-                        width: '200px', 
-                        height: '50px'  // Border color
-                        }}onClick={handleShow} id="openProfile" rounded outline 
-                    >
-                        <Plus size={30} color="white"/>
-                        New Profile 
+                    <MDBBtn className="createProfileButtonAdmin" 
+                         onClick={handleShow} id="openProfile" rounded outline> <Plus size={30} color="white"/>New Profile 
                     </MDBBtn>
                     <i class="fa fa-ellipsis-h ms-3"></i>
                 <CreateProfile 
                     show={show} onHide={handleClose} handleClose={handleClose} title="New Profile"
-                    style={{ width: '100%', maxWidth: '1000px', padding: '20px' }}>
+                    id='createProfileButtonElement'>
                 </CreateProfile>
             </Col>
         </Row>
-        
         {/* DISPLAY TABLE */}
-        <AdminTable data={data}/>
+        <AdminTable data={data} searchTerm={searchTerm}/>
     </Container>
     );
 }
