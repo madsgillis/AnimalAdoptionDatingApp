@@ -5,6 +5,9 @@ import AdoptionFeed from './components/feed/news-feed';
 import AnimalCards from './components/homepage/homepage';
 import SignIn from './components/sign-in/sign-in';
 import SignUp from './components/sign-in/sign-up';
+import LincolnAnimalProfile from './components/animal-profiles/lincoln-animal-profile';
+import WhiskersAnimalProfile from './components/animal-profiles/whiskers-animal-profile';
+import LilyAnimalProfile from './components/animal-profiles/lily-animal-profile';
 
 /* routes: adding separate pages for REACT */
 function App() {
@@ -46,6 +49,9 @@ function App() {
           <Route path='/' element={<AnimalCards />} />
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
+          <Route path="/lincoln-animal-profile" element={<LincolnAnimalProfile />} />
+          <Route path="/whiskers-animal-profile" element={<WhiskersAnimalProfile />} />
+          <Route path="/lily-animal-profile" element={<LilyAnimalProfile />} />
         </Routes>
       </div>
     </Router>
