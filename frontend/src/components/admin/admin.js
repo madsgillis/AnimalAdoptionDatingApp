@@ -7,7 +7,6 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import './admin.css'
-import searchTable from './search-table';
 
 // icons
 import { Plus } from 'react-bootstrap-icons';
