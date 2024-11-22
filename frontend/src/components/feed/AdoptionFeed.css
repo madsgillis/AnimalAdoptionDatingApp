@@ -20,3 +20,99 @@
   button.custom-hide-btn:focus {
     box-shadow: none !important;
   }
+
+  .filter-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1000;
+    margin-top: 0.5rem;
+    width: 400px;
+  }
+
+  .filter-controls {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+
+  .filter-controls h5 {
+    color: #495057;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .filter-controls .form-check {
+    margin-right: 1rem;
+  }
+
+  .filter-controls .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+
+  /* Add divider between filter sections */
+  .filter-controls form:not(:last-child) {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Add smooth animation for collapse */
+  .collapse {
+    transition: height 0.3s ease !important;
+  }
+
+  /* Style for the filter button */
+  .btn-outline-primary,
+  .btn-primary {  /* Add this to target both outline and filled states */
+    border-radius: 20px;  /* This creates the oval shape */
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+  }
+
+  /* Ensure the shape stays consistent when active/focused */
+  .btn-primary:active,
+  .btn-primary:focus,
+  .btn-primary:hover,
+  .btn-outline-primary:active,
+  .btn-outline-primary:focus,
+  .btn-outline-primary:hover {
+    border-radius: 20px !important;
+  }
+
+  /* If needed, add specific styles for the like button */
+  .like-button {
+    border-radius: 20px !important;
+    padding: 0.25rem !important;
+    height: 32px !important;
+    width: 32px !important;  /* Make it square */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: unset !important;  /* Remove any min-width */
+  }
+
+  .like-button span {
+    line-height: 1 !important;
+    font-size: 1.2rem !important;  /* Adjust heart size if needed */
+  }
+
+  .like-count {
+    font-size: 0.9rem;
+    color: #6c757d;  /* Bootstrap's text-muted color */
+    min-width: 1rem;  /* Ensures some stability for single digits */
+  }
+
+  /* Make the checkboxes wrap if needed */
+  .filter-controls .d-flex {
+    flex-wrap: wrap;
+    gap: 1rem !important;
+  }
+
+  /* Add some bottom margin to wrapped items */
+  .filter-controls .form-check {
+    margin-bottom: 0.5rem;
+  }
