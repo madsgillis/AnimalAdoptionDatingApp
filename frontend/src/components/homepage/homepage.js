@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 import {
     MDBCard,
     MDBCardImage,
@@ -7,6 +8,7 @@ import {
     MDBCardText,
     MDBCardGroup,
     MDBBtn,
+    MDBContainer,
 } from "mdb-react-ui-kit";
 
 import lincolnImage from "../images/lincoln.jpg";
@@ -15,37 +17,47 @@ import LilyImage from "../images/pexels-charles.jpg";
 
 export default function AnimalCards() {
     return (
-        <MDBCardGroup className="w-75 p-5 mh-75 mx-auto">
-            <MDBCard>
-                <MDBCardImage
-                    src={lincolnImage}
-                    alt="..."
-                    position="top"
-                />
-                <MDBCardBody>
-                    <MDBCardTitle>Lincoln</MDBCardTitle>
-                    <MDBCardText>Animal information goes here</MDBCardText>
-                    <MDBBtn>Find out more about me!</MDBBtn>
-                </MDBCardBody>
-            </MDBCard>
+        <MDBContainer className="fluid vh-100 d-flex align-items-center justify-content-center">
+            <MDBCardGroup>
+                <MDBCard>
+                    <MDBCardImage
+                        src={lincolnImage}
+                        alt="..."
+                        position="top"
+                    />
+                    <MDBCardBody>
+                        <MDBCardTitle>Lincoln</MDBCardTitle>
+                        <MDBCardText>Meet Lincoln, a charismatic parrot with a knack for mimicking sounds and a heart ready to find his forever home!</MDBCardText>
+                        <Link to="/lincoln-animal-profile">
+                            <MDBBtn>Find out more about me!</MDBBtn>
+                        </Link>
 
-            <MDBCard>
-                <MDBCardImage src={whiskersImage} alt="..." position="top" />
-                <MDBCardBody>
-                    <MDBCardTitle>Whiskers</MDBCardTitle>
-                    <MDBCardText>Animal information goes here</MDBCardText>
-                    <MDBBtn>Find out more about me!</MDBBtn>
-                </MDBCardBody>
-            </MDBCard>
+                    </MDBCardBody>
+                </MDBCard>
 
-            <MDBCard>
-                <MDBCardImage src={LilyImage} alt="..." position="top" />
-                <MDBCardBody>
-                    <MDBCardTitle>Lily</MDBCardTitle>
-                    <MDBCardText>Animal information goes here</MDBCardText>
-                    <MDBBtn>Find out more about me!</MDBBtn>
-                </MDBCardBody>
-            </MDBCard>
-        </MDBCardGroup>
+                <MDBCard>
+                    <MDBCardImage src={whiskersImage} alt="..." position="top" />
+                    <MDBCardBody>
+                        <MDBCardTitle>Whiskers</MDBCardTitle>
+                        <MDBCardText>Say hello to Whiskers, a sweet and curious tabby cat ready to bring love and purrs to her forever home!</MDBCardText>
+                        <Link to="/whiskers-animal-profile">
+                            <MDBBtn>Find out more about me!</MDBBtn>
+                        </Link>
+                    </MDBCardBody>
+                </MDBCard>
+
+                <MDBCard>
+                    <MDBCardImage src={LilyImage} alt="..." position="top" />
+                    <MDBCardBody>
+                        <MDBCardTitle>Lily</MDBCardTitle>
+                        <MDBCardText>Meet Lily, an irresistibly charming pug who’s ready to fill your life with cuddles and laughter!</MDBCardText>
+                        <Link to="/lily-animal-profile">
+                            <MDBBtn>Find out more about me!</MDBBtn>
+                        </Link>
+                    </MDBCardBody>
+                </MDBCard>
+            </MDBCardGroup>
+        </MDBContainer>
+
     );
 }
