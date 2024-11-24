@@ -25,7 +25,7 @@ function CreateProfile({children, handleClose, show, props}) {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>Close</Button>
-                    <Button variant="primary" onClick={handleClose}>Save changes</Button>
+                    <Button variant="primary" onClick={handleClose}>Add Profile</Button>
                 </Modal.Footer>
             </Modal>
         </div>

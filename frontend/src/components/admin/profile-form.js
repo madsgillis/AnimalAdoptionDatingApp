@@ -26,6 +26,9 @@ function ProfileForm() {
     const [dispositionTraits, setDispositionTraits] = useState(dispositionTraitsList);
     const [selectedTraits, setSelectedTraits] = useState([]);
 
+    
+
+
     /* Selecting disposition traits   */
     const handleTraitClick = (trait) => {
         setSelectedTraits((prevSelected) => {

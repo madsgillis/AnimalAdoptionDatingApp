@@ -12,6 +12,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Col from 'react-bootstrap/Col';
+import EditProfile from './edit-profile';
 
 // Import images
 import charlesImage from '../images/pexels-charles.jpg';
@@ -64,6 +65,12 @@ function AdminTable({data, searchTerm}) {
 
     // profile count
     totalProfiles = data.length;
+
+    // edit button
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
     
     return (
         <Container fluid>
@@ -103,9 +110,13 @@ function AdminTable({data, searchTerm}) {
                                                     </button>
                                                 </td>
                                                 <td>
-                                                    <button className="btn btn-primary">
+                                                    <button className="btn btn-primary" onClick={handleShow} id="openProfile">
                                                         <i className="bi bi-pencil"></i> Edit
                                                     </button>
+                                                    <EditProfile 
+                                                            show={show} onHide={handleClose} handleClose={handleClose} title="Edit Profile"
+                                                            id='editProfileButtonElement'>
+                                                    </EditProfile>
                                                 </td>
                                                 <td>
                                                     <button className="btn btn-danger">
