@@ -2,7 +2,7 @@
 // 1. For using Modal React-Bootstrap: https://react-bootstrap.netlify.app/docs/components/modal/
 // 2. For using Form React-Boostrap: https://react-bootstrap.netlify.app/docs/forms/overview
 // 3. For auto complete React search options: https://www.geeksforgeeks.org/react-suite-autocomplete-combined-with-inputgroup/?ref=oin_asr8
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
@@ -17,17 +17,43 @@ import { MDBDatepicker } from 'mdb-react-ui-kit';
 // custom helpers
 import StatusTag from '../helpers/StatusTag.js';
 
-function ProfileForm() {
+const ProfileForm = ({onUpdate, formData, setFormData}) => {
+    console.info('On ProfileForm: Here is the pre-edit data:', formData)
+    console.log("setFormData is: on profile form: ", setFormData);
+    
+    /*useEffect(() => {
+        // Only set the form data if it's not already initialized or if it's different
+        if (formData && !formData.name) {  // Assuming formData should have a 'name' field that will always exist when it's set
+            setFormData(formData); // Initialize the form with provided data
+        }
+    }, [formData]); 
+    */
+    // fill in values if in editing mode
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+          ...prevData,
+          [name]: value
+        }));
+      };
+
+    //console.info('On ProfileForm: Here is the name object:', formData.prevData.name)
+    //console.info('On ProfileForm: Here is the animal sex:', formData.prevData.animal_sex)
+
     const statusOptions = ['Available', 'Adopted', 'On Hold', 'Currently Unavailable'];
-    const sexOptions = ['Female', 'Male'];
+    const sexOptions = ['F', 'M'];
     const dispositionTraitsList = ['Shy', 'Calm', 'Family Friendly', 'Sassy', 'Independent', 'Social', 'Affectionate', 'Loyal', 'Trainable',
                                 'Energetic', 'Stubborn', 'Protective', 'Working Dog', 'Anxious', 'Attached', 'Vocal', 'Curious', 'Active', 'Playful', 'Adaptable']
 
     const [dispositionTraits, setDispositionTraits] = useState(dispositionTraitsList);
     const [selectedTraits, setSelectedTraits] = useState([]);
 
-    
-
+    // when prevData is updated for edit, display these traits:
+    useEffect(() => {
+        if (formData && formData.dispositions) {
+            setSelectedTraits(formData.dispositions.split(',')); // Assuming dispositions are a comma-separated string
+        }
+    }, [formData]);
 
     /* Selecting disposition traits   */
     const handleTraitClick = (trait) => {
@@ -41,18 +67,54 @@ function ProfileForm() {
             }
         });
     };
+
+    // submit form 
+    const handleSubmit = async (e) => {
+        e.preventDefault(); // Prevent default form submission
+
+        const updatedData = {
+            ...formData.prevData,
+            dispositions: selectedTraits.join(','), // Convert selected traits to a string
+            
+
+            // Include other fields as needed
+        };
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/admin/edit-profile', {
+                method: 'PUT', // or 'POST' depending on your API
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const result = await response.json();
+            console.log('Update successful:', result);
+            onUpdate(); // Call a function to refresh data or close modal
+        } catch (error) {
+            console.error('Error updating data:', error);
+        }
+    };
+
+
     
     return (
-        <Form>
+        <Form onSubmit={handleSubmit}>
             {/* Date picker */}
             <Form.Group className="mb-4">
                 <Form.Label>Today's Date</Form.Label>
-                <Form.Control type="date"/>
+                <Form.Control name="date" type="date" value={formData.date} onChange={handleInputChange}/>
             </Form.Group>
             {/* NAME text input */}
             <Form.Group className="mb-4" controlId="formBasicEmail">
                 <Form.Label>Name</Form.Label>
-                <Form.Control type="email" placeholder="Enter name" />
+                <Form.Control type="text" name="name" placeholder="Enter name" value={formData.name}
+                            onChange={handleInputChange}/>
             </Form.Group>
             
             {/* ROW: Gender, Age, Species */}
@@ -65,10 +127,13 @@ function ProfileForm() {
                         <div key={`status-${index}`}className="mb-3" style={{ display: 'flex', alignItems: 'center' }}>
                             <Form.Check
                                 inline
-                                name="status"
+                                name="animal_sex"
                                 type="radio"
                                 id={`status-${index}`}
                                 label={status}
+                                value={status} 
+                                checked={formData.animal_sex === status}
+                                onChange={handleInputChange}
                             />
                         </div>
                         ))}
@@ -81,8 +146,9 @@ function ProfileForm() {
                         <InputGroup className="mb-3">
                             <Form.Control
                             placeholder="ex. 5"
-                            aria-label="Animal age"
-                            aria-describedby="basic-addon2"
+                            name="age"
+                            value={formData.age}
+                            onChange={handleInputChange}
                             />
                             <InputGroup.Text id="basic-addon2">years old</InputGroup.Text>
                         </InputGroup>
@@ -91,12 +157,13 @@ function ProfileForm() {
                     {/* Species selection  */}
                     <Form.Group as={Col} sm={4} controlId="formBasicEmail">
                         <Form.Label>Species</Form.Label>
-                        <Form.Select defaultValue="Select">
-                            <option>Select</option>
-                            <option value="1">Dog</option>
-                            <option value="2">Cat</option>
-                            <option value="3">Bird</option>
-                            <option value="3">Other</option>
+                        <Form.Select defaultValue="Select" value={formData.species} 
+                            onChange={handleInputChange}>
+                            <option value="">Select</option>
+                            <option value="Dog">Dog</option>
+                            <option value="Cat">Cat</option>
+                            <option value="Bird">Bird</option>
+                            <option value="Other">Other</option>
                         </Form.Select>
                     </Form.Group>
             </Row>
@@ -115,12 +182,15 @@ function ProfileForm() {
                         id={`status-${index}`}
                         label={<StatusTag status={status}/>}
                         defaultChecked={index === 0}
+                        value={status} 
+                        checked={formData.availability === status}
+                        onChange={handleInputChange}
                     />
                 </div>
                 ))}
                 </div>
             </Form.Group>
-
+            
             {/* Disposition */}
             {/* Search traits and add to list of selected traits */}
             <Row className="mb-4" rounded style={{ backgroundColor: '#f0f0f0', padding: '15px', borderRadius: '8px' }}>
@@ -158,7 +228,9 @@ function ProfileForm() {
                 <Form.Label>Animal Description</Form.Label>
                 <InputGroup>
                     <InputGroup.Text>Description of Animal</InputGroup.Text>
-                    <Form.Control as="textarea" aria-label="With textarea" />
+                    <Form.Control as="textarea" aria-label="With textarea"
+                    name="description" value={formData.description}
+                    onChange={handleInputChange} />
                 </InputGroup>
             </Form.Group>
 

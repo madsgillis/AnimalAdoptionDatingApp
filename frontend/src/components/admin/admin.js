@@ -34,7 +34,7 @@ import { MDBBtn, MDBInputGroup, MDBInput, MDBIcon } from 'mdb-react-ui-kit';
         const fetchData = async () => {
             try {
                 console.log("Fetching data from backend");
-                const response = await fetch('http://127.0.0.1:5000/admin', {
+                const response = await fetch('http://127.0.0.1:5000/admin/edit-profile', {
                     headers: {
                         'Content-Type': 'application/json'
                     }
@@ -59,6 +59,7 @@ import { MDBBtn, MDBInputGroup, MDBInput, MDBIcon } from 'mdb-react-ui-kit';
 
     if (data.length === 0) return <p>No data available.</p>;
 
+    
     return (
     <Container fluid="md" className="mb-3">
         <Row className="mb-5" style={{marginTop:'35px'}}>

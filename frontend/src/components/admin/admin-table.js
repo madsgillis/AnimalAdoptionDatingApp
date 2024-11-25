@@ -2,7 +2,7 @@
 //  1. pagination tutorial: https://react-table-v7-docs.netlify.app/docs/examples/pagination
 //  2. pagination -- https://medium.com/@thewidlarzgroup/react-table-7-sorting-filtering-pagination-and-more-6bc28af104d6
 
-import {React, useState} from 'react';
+import {React, useState, useEffect} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../../App.css';
@@ -31,11 +31,15 @@ const imageMapping = {
 let totalProfiles = 0;
 
 // display main admin table
-function AdminTable({data, searchTerm}) {
+const AdminTable = ({data, searchTerm}) =>{
+    const prevData = data;
+    console.info('On admin-table: Here is the pre-edit data:', prevData)
 
     // State to keep track of current page
     const [itemsPerPage, setItemsPerPage] = useState(3);  // default is 3
     const [currentPage, setCurrentPage] = useState(1);
+    //const [currentData, setCurrentData] = useState([]);
+    const [currentDataNow, setCurrentDataNow] = useState([]);
     
     // number of items per page, dependent on user drop down selection
     const handleItemsPerPageChange = (num) => {
@@ -66,12 +70,71 @@ function AdminTable({data, searchTerm}) {
     // profile count
     totalProfiles = data.length;
 
-    // edit button
+    // handle opening of modal
     const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-
     
+    // store profile data for selected animal
+    const [selectedAnimal, setSelectedAnimal] = useState(null);
+    const handleEditShow = (animal) => {
+        setSelectedAnimal(animal);  // Set the data for the profile being edited
+        setShow(true); // Open the modal
+    };
+
+    // Fetch initial data when component mounts
+    useEffect(() => {
+        fetchAnimalData();
+    }, []);
+
+    // Function to fetch animal data
+    const fetchAnimalData = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:5000/admin/edit-profile');
+            const data = await response.json();
+            setCurrentDataNow(data);
+        } catch (error) {
+            console.error('Error fetching animal data:', error);
+        }
+    };
+    
+    /*// Function to handle updating data
+    const postUpdatedData = async (data) => {
+        try {
+            const response = await fetch('/api/animals/update', {
+                method: 'POST', // or 'PUT' if you're updating an existing record
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data), // Convert data object to JSON
+            });
+
+            if (response.ok) {
+                console.log('Data updated successfully!');
+                fetchAnimalData();  // Fetch updated data after successful update
+            } else {
+                console.error('Error updating data:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error sending updated data:', error);
+        }
+    };
+
+    */
+    // handle closing of modal
+    const handleClose = () => {
+        setShow(false);
+        setSelectedAnimal(null); // Clear the selected animal when closing
+    };
+
+    const onUpdate = async () => {
+        // Call fetch to get updated data from the backend
+        const response = await fetch('http://127.0.0.1:5000/admin');
+        console.log("updated data: ", response);
+        const updatedData = await response.json();
+        setCurrentDataNow(updatedData);  // Update the state with the new data
+    };
+
+  
     return (
         <Container fluid>
             <div id="adminTableWrapper">
@@ -110,10 +173,13 @@ function AdminTable({data, searchTerm}) {
                                                     </button>
                                                 </td>
                                                 <td>
-                                                    <button className="btn btn-primary" onClick={handleShow} id="openProfile">
+                                                    <button onClick={() => handleEditShow(animal)}
+                                                     className="btn btn-primary" id="openProfile">
                                                         <i className="bi bi-pencil"></i> Edit
                                                     </button>
-                                                    <EditProfile 
+                                                    <EditProfile
+                                                            onUpdate={onUpdate}
+                                                            profileData={selectedAnimal}
                                                             show={show} onHide={handleClose} handleClose={handleClose} title="Edit Profile"
                                                             id='editProfileButtonElement'>
                                                     </EditProfile>
