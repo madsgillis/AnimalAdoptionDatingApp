@@ -4,7 +4,7 @@
 // 3. For auto complete React search options: https://www.geeksforgeeks.org/react-suite-autocomplete-combined-with-inputgroup/?ref=oin_asr8
 import React, {useState} from 'react';
 import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -17,39 +17,116 @@ import { MDBDatepicker } from 'mdb-react-ui-kit';
 // custom helpers
 import StatusTag from '../helpers/StatusTag.js';
 
-function ProfileForm() {
+const ProfileForm = ({handleClose, onSubmit }) => {
+    const [formData, setFormData] = useState({
+        date: '',
+        name: '',
+        sex: '',
+        age: '',
+        species: '',
+        status: '',
+        selectedTraits: [],
+        description: ''
+    });
     const statusOptions = ['Available', 'Adopted', 'On Hold', 'Currently Unavailable'];
     const sexOptions = ['Female', 'Male'];
-    const dispositionTraitsList = ['Shy', 'Calm', 'Family Friendly', 'Sassy', 'Independent', 'Social', 'Affectionate', 'Loyal', 'Trainable',
-                                'Energetic', 'Stubborn', 'Protective', 'Working Dog', 'Anxious', 'Attached', 'Vocal', 'Curious', 'Active', 'Playful', 'Adaptable']
+    const dispositionTraitsList = [
+        'Shy', 'Calm', 'Family Friendly', 'Sassy', 'Independent', 'Social', 'Affectionate', 'Loyal', 'Trainable',
+        'Energetic', 'Stubborn', 'Protective', 'Working Dog', 'Anxious', 'Attached', 'Vocal', 'Curious',
+        'Active', 'Playful', 'Adaptable']
 
     const [dispositionTraits, setDispositionTraits] = useState(dispositionTraitsList);
     const [selectedTraits, setSelectedTraits] = useState([]);
 
     /* Selecting disposition traits   */
     const handleTraitClick = (trait) => {
-        setSelectedTraits((prevSelected) => {
-            if (prevSelected.includes(trait)) {
-                // Deselect the trait
-                return prevSelected.filter((t) => t !== trait);
+        setFormData((prevData) => {
+            const { selectedTraits } = prevData;
+            if (selectedTraits.includes(trait)) {
+                // Deselect the trait if already selected
+                return { ...prevData, selectedTraits: selectedTraits.filter((t) => t !== trait)};
             } else {
                 // Select the trait
-                return [...prevSelected, trait];
+                return { ...prevData, selectedTraits: [...selectedTraits, trait] };
             }
         });
     };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log("Form submitted"); // debug
+        handleClose();
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/admin/create-profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            // debug
+            if (!response.ok) {
+                console.error("Failed to create profile, status: ", response.status, response.statusText);
+                const errorText = await response.text();
+                console.error("Error response body: ", errorText);
+                return;
+            }
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // reset form
+                setFormData({
+                    date: '',
+                    name: '',
+                    sex: '',
+                    age: '',
+                    species: '',
+                    status: '',
+                    selectedTraits: [],
+                    description: ''}
+                );
+                console.log("New profile successfully created!");
+                handleClose();
+            } else {
+                console.error("Failed to create profile.");
+            }
+        } catch (error) {
+            console.error("There was an error: ", error);
+        }
+    };
     
     return (
-        <Form>
+        <Form onSubmit={handleSubmit}>
             {/* Date picker */}
             <Form.Group className="mb-4">
                 <Form.Label>Today's Date</Form.Label>
-                <Form.Control type="date"/>
+                <Form.Control
+                    type="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleChange}
+                    required
+                />
             </Form.Group>
             {/* NAME text input */}
-            <Form.Group className="mb-4" controlId="formBasicEmail">
+            <Form.Group className="mb-4" controlId="formName">
                 <Form.Label>Name</Form.Label>
-                <Form.Control type="email" placeholder="Enter name" />
+                <Form.Control
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Enter name"
+                    required
+                />
             </Form.Group>
             
             {/* ROW: Gender, Age, Species */}
@@ -58,14 +135,17 @@ function ProfileForm() {
                     <Form.Group as={Col} sm={4}>
                         <Form.Label>Animal's Sex</Form.Label>
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center'}}>
-                        {sexOptions.map((status, index) => (
+                        {sexOptions.map((sex, index) => (
                         <div key={`status-${index}`}className="mb-3" style={{ display: 'flex', alignItems: 'center' }}>
                             <Form.Check
                                 inline
-                                name="status"
+                                key={`sex-${index}`}
+                                name="sex"
                                 type="radio"
-                                id={`status-${index}`}
-                                label={status}
+                                value={sex}
+                                onChange={handleChange}
+                                label={sex}
+                                required
                             />
                         </div>
                         ))}
@@ -77,23 +157,32 @@ function ProfileForm() {
                         <Form.Label>Age</Form.Label>
                         <InputGroup className="mb-3">
                             <Form.Control
+                            name="age"
+                            value={formData.age}
+                            onChange={handleChange}
                             placeholder="ex. 5"
                             aria-label="Animal age"
                             aria-describedby="basic-addon2"
+                            required
                             />
                             <InputGroup.Text id="basic-addon2">years old</InputGroup.Text>
                         </InputGroup>
                     </Form.Group>
                     
                     {/* Species selection  */}
-                    <Form.Group as={Col} sm={4} controlId="formBasicEmail">
+                    <Form.Group as={Col} sm={4} controlId="formSpecies">
                         <Form.Label>Species</Form.Label>
-                        <Form.Select defaultValue="Select">
+                        <Form.Select
+                            name="species"
+                            value={formData.species}
+                            onChange={handleChange}
+                            required
+                        >
                             <option>Select</option>
-                            <option value="1">Dog</option>
-                            <option value="2">Cat</option>
-                            <option value="3">Bird</option>
-                            <option value="3">Other</option>
+                            <option value="Dog">Dog</option>
+                            <option value="Cat">Cat</option>
+                            <option value="Bird">Bird</option>
+                            <option value="Other">Other</option>
                         </Form.Select>
                     </Form.Group>
             </Row>
@@ -107,11 +196,13 @@ function ProfileForm() {
                 <div key={`status-${index}`}className="mb-3" style={{ display: 'flex', alignItems: 'center' }}>
                     <Form.Check
                         inline
+                        key={`status-${index}`}
                         name="status"
                         type="radio"
-                        id={`status-${index}`}
+                        value={status}
+                        onChange={handleChange}
                         label={<StatusTag status={status}/>}
-                        defaultChecked={index === 0}
+                        required
                     />
                 </div>
                 ))}
@@ -128,13 +219,16 @@ function ProfileForm() {
                             {dispositionTraits.map((trait, index) => (
                                 <Button
                                     key={`trait-${index}`}
-                                    variant={selectedTraits.includes(trait) ? 'primary' : 'outline-primary'}
-                                    onClick={() => handleTraitClick(trait)}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleTraitClick(trait);
+                                    }}
+                                    variant={formData.selectedTraits.includes(trait) ? 'primary' : 'outline-primary'}
                                     style={{
                                         padding: '10px 20px',
                                         fontSize: '14px',
                                         borderRadius: '20px', // More rounded corners for a softer look
-                                        backgroundColor: selectedTraits.includes(trait) ? '#007bff' : '#f8f9fa',
+                                        backgroundColor: formData.selectedTraits.includes(trait) ? '#007bff' : '#f8f9fa',
                                         color: selectedTraits.includes(trait) ? 'white' : '#007bff',
                                         cursor: 'pointer',
                                         transition: 'background-color 0.3s, transform 0.2s', // Smooth transition
@@ -146,7 +240,7 @@ function ProfileForm() {
                             ))}
                         </div>
                         <div style={{ marginTop: '10px' }}>
-                            <strong>Selected Traits:</strong> {selectedTraits.join(', ')}
+                            <strong>Selected Traits:</strong> {formData.selectedTraits.join(', ')}
                         </div>
                 </Form.Group>
             </Row>
@@ -155,7 +249,13 @@ function ProfileForm() {
                 <Form.Label>Animal Description</Form.Label>
                 <InputGroup>
                     <InputGroup.Text>Description of Animal</InputGroup.Text>
-                    <Form.Control as="textarea" aria-label="With textarea" />
+                    <Form.Control
+                        as="textarea"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        //aria-label="With textarea"
+                    />
                 </InputGroup>
             </Form.Group>
 
@@ -164,6 +264,10 @@ function ProfileForm() {
                 <Form.Label>Profile Picture</Form.Label>
                 <Form.Control type="file" />
             </Form.Group>
+
+            <Button variant="primary" type="submit">
+                Create Profile
+            </Button>
         </Form>
     );
 

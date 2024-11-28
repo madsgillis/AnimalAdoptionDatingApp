@@ -9,28 +9,32 @@ import Form from 'react-bootstrap/Form';
 import ProfileForm from './profile-form';
 import Button from 'react-bootstrap/Button';
 
-function CreateProfile({children, handleClose, show, props}) {
+function CreateProfile({handleClose, onSubmit, show, props}) {
     return(
         <div>
-            <Modal show={show} onHide={handleClose} 
-            {...props}
-            size="lg"
-            aria-labelledby="contained-modal-title-vcenter"
-            centered>
+            <Modal
+                show={show}
+                onHide={handleClose} 
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+            >
                 <Modal.Header closeButton>
-                    <Modal.Title id="contained-modal-title-vcenter">Create Animal Profile</Modal.Title>
+                    <Modal.Title id="contained-modal-title-vcenter">
+                        Create Animal Profile
+                    </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <ProfileForm/>
+                    <ProfileForm
+                        handleClose={handleClose} onSubmit={onSubmit} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>Close</Button>
-                    <Button variant="primary" onClick={handleClose}>Save changes</Button>
                 </Modal.Footer>
             </Modal>
         </div>
     );
-}
+};
 
 export default CreateProfile;
 

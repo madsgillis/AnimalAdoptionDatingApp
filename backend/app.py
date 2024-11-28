@@ -61,6 +61,92 @@ def get_admin_data():
     finally:
         connection.close()
 
+# Route to create new animal profile
+@app.route('/admin/create-profile', methods=['POST'])
+def create_profile():
+
+    animal_data = request.get_json()
+
+    if not animal_data:
+        return jsonify({"error": "No data provided"}), 400
+
+    date = animal_data.get('date')
+    name = animal_data.get('name')
+    sex = animal_data.get('sex')
+    age = animal_data.get('age')
+    species = animal_data.get('species')
+    availability = animal_data.get('status')
+    disposition = animal_data.get('selectedTraits')
+    description = animal_data.get('description')
+
+    connection = db_connection()
+    try:
+        with connection.cursor() as cursor:
+
+            if sex == 'Male':
+                sex_char = 'M'
+            if sex == 'Female':
+                sex_char = 'F'
+
+            # get corresponding ID for species string
+            species_query = "SELECT species_id from Species where species_desc = %s;"
+            cursor.execute(species_query, species)
+            data = cursor.fetchone()
+            if data:
+                species_id = data['species_id']
+            else:
+                species_id = None
+
+            # get corresponding ID for availability string
+            avail_query = "SELECT avail_id from Availability where avail_desc = %s;"
+            cursor.execute(avail_query, availability)
+            data = cursor.fetchone()
+            if data:
+                avail_id = data['avail_id']
+            else:
+                avail_id = None
+
+            # insert new animal profile into database
+            sql_query = """
+                INSERT INTO Animals (date, animal_name, animal_sex, age, species, availability, description)
+                VALUES (%s, %s, %s, %s, %s, %s, %s);
+                """
+            cursor.execute(sql_query, (date, name, sex_char, age, species_id, avail_id, description))
+            connection.commit()
+
+            # get ID for animal profile that was just created
+            animal_query = """
+                SELECT animal_id FROM Animals WHERE date = %s AND animal_name = %s AND animal_sex = %s
+                AND age = %s AND species = %s AND availability = %s and description = %s;
+                """
+            cursor.execute(animal_query, (date, name, sex_char, age, species_id, avail_id, description))
+            data = cursor.fetchone()
+            if data:
+                animal_id = data['animal_id']
+            else:
+                animal_id = None
+            
+            # add each disposition for new animal profile
+            for disp_desc in disposition:
+                disp_desc_query = "SELECT disp_id from Dispositions WHERE disp_desc = %s;"
+                cursor.execute(disp_desc_query, (disp_desc,))
+                data = cursor.fetchone()
+                if data:
+                    disp_id = data['disp_id']
+                else:
+                    disp_id = None
+
+                disp_query = "INSERT INTO AnimalDispositions (animal_id, disposition_id) VALUES (%s, %s);"
+                cursor.execute(disp_query, (animal_id, disp_id))
+                connection.commit()
+
+            connection.commit()
+            return jsonify(success=True, message="New profile successfully created!"), 201
+    except Exception as e:
+        return jsonify({"Error": str(e)}), 500
+    finally:
+        connection.close()
+
 # Homepage
 @app.route('/')
 def index():
