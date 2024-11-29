@@ -180,7 +180,8 @@ const AdminTable = ({data, searchTerm}) =>{
                                                     <EditProfile
                                                             onUpdate={onUpdate}
                                                             profileData={selectedAnimal}
-                                                            show={show} onHide={handleClose} handleClose={handleClose} title="Edit Profile"
+                                                            show={show} onHide={handleClose} handleClose={handleClose} 
+                                                            title="Edit Profile"
                                                             id='editProfileButtonElement'>
                                                     </EditProfile>
                                                 </td>

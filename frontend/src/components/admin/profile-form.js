@@ -36,7 +36,7 @@ const ProfileForm = ({onUpdate, formData, setFormData}) => {
           [name]: value
         }));
       };
-
+    
     //console.info('On ProfileForm: Here is the name object:', formData.prevData.name)
     //console.info('On ProfileForm: Here is the animal sex:', formData.prevData.animal_sex)
 
@@ -67,9 +67,9 @@ const ProfileForm = ({onUpdate, formData, setFormData}) => {
             }
         });
     };
-
+    
     // submit form 
-    const handleSubmit = async (e) => {
+    /*const handleSubmit = async (e) => {
         e.preventDefault(); // Prevent default form submission
 
         const updatedData = {
@@ -100,11 +100,11 @@ const ProfileForm = ({onUpdate, formData, setFormData}) => {
             console.error('Error updating data:', error);
         }
     };
-
+    */
 
     
     return (
-        <Form onSubmit={handleSubmit}>
+        <Form>
             {/* Date picker */}
             <Form.Group className="mb-4">
                 <Form.Label>Today's Date</Form.Label>

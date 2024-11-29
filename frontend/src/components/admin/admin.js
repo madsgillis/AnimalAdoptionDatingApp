@@ -28,34 +28,36 @@ import { MDBBtn, MDBInputGroup, MDBInput, MDBIcon } from 'mdb-react-ui-kit';
     /* search bar */
     const [showSearchAlert, setShowSearchAlert] = useState(false);
 
-    /* fetching and posting data */
-    const [data, setData] = useState([]);
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                console.log("Fetching data from backend");
-                const response = await fetch('http://127.0.0.1:5000/admin/edit-profile', {
-                    headers: {
-                        'Content-Type': 'application/json'
+    // fetching data for admin table
+        /* fetching and posting data */
+        const [data, setData] = useState([]);
+        useEffect(() => {
+            const fetchData = async () => {
+                try {
+                    console.log("Fetching data from backend");
+                    const response = await fetch('http://127.0.0.1:5000/admin', {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    console.log(response);
+                    if (!response.ok) {
+                        throw new Error('Network did not respond');
                     }
-                });
-                console.log(response);
-                if (!response.ok) {
-                    throw new Error('Network did not respond');
+
+                    // Parse response as JSON
+                    const result = await response.json();
+                    console.log("Fetched data:", result);
+                    setData(result);
+
+                } catch (error) {
+                    console.error('Error fetching data: ', error);
                 }
+            };
 
-                // Parse response as JSON
-                const result = await response.json();
-                console.log("Fetched data:", result);
-                setData(result);
+            fetchData();
+        }, []);
 
-            } catch (error) {
-                console.error('Error fetching data: ', error);
-            }
-        };
-
-        fetchData();
-    }, []);
 
     if (data.length === 0) return <p>No data available.</p>;
 
