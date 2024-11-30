@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pymysql.cursors
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -115,71 +116,173 @@ def get_profile():
         connection.close()
 
 
-@app.route('/edit-profile', methods=['PUT'])
-def update_animal():
-    data = request.get_json()  # Get the JSON data from the request
-    print("HERE IS THE DATA", data)
-    
-    # Extract data from the request
-    animal_id = data.get('animal_id')
-    name = data.get('name')
-    #species = data.get('species')
-    age = data.get('age')
-    animal_sex = data.get('animal_sex')
-    #availability = data.get('availability')
-    dispositions = data.get('dispositions')
+@app.route('/admin/create-profile', methods=['POST'])
+def create_profile():
+
+    animal_data = request.get_json()
+    #sex_char = ''
+
+    if not animal_data:
+        return jsonify({"error": "No data provided"}), 400
+
+    date = animal_data.get('date')
+    name = animal_data.get('name')
+    sex = animal_data.get('sex')
+    age = animal_data.get('age')
+    species = animal_data.get('species')
+    availability = animal_data.get('status')
+    disposition = animal_data.get('selectedTraits')
+    description = animal_data.get('description')
 
     connection = db_connection()
     try:
         with connection.cursor() as cursor:
-            # Update the animal record
-            sql = """
-                UPDATE Animals
-                SET animal_name = %s, age = %s, animal_sex = %s
-                WHERE animal_id = %s
-            """
-            cursor.execute(sql, (name, age, animal_sex, animal_id))
+
+            if sex == "M":
+                sex_char = 'M'
+            if sex == "F":
+                sex_char = 'F'
+
+            # get corresponding ID for species string
+            species_query = "SELECT species_id from Species where species_desc = %s;"
+            cursor.execute(species_query, species)
+            data = cursor.fetchone()
+            if data:
+                species_id = data['species_id']
+            else:
+                species_id = None
+
+            # get corresponding ID for availability string
+            avail_query = "SELECT avail_id from Availability where avail_desc = %s;"
+            cursor.execute(avail_query, availability)
+            data = cursor.fetchone()
+            if data:
+                avail_id = data['avail_id']
+            else:
+                avail_id = None
+
+            # insert new animal profile into database
+            sql_query = """
+                INSERT INTO Animals (date, animal_name, animal_sex, age, species, availability, description)
+                VALUES (%s, %s, %s, %s, %s, %s, %s);
+                """
+            cursor.execute(sql_query, (date, name, sex_char, age, species_id, avail_id, description))
             connection.commit()
 
-            # Optionally update dispositions if you have a separate table for them
-            # Clear existing dispositions
-            cursor.execute("DELETE FROM AnimalDispositions WHERE animal_id = %s", (animal_id,))
-            # Insert new dispositions
-            if dispositions:
-                for disposition in dispositions.split(','):
-                    cursor.execute("INSERT INTO AnimalDispositions (animal_id, disposition_id) VALUES (%s, (SELECT disp_id FROM Dispositions WHERE disp_desc = %s))", (animal_id, disposition.strip()))
-
-            connection.commit()  # Commit the changes
-            # Query the updated record
-            cursor.execute("""
-                SELECT a.animal_id, a.animal_name, a.species, a.age, a.animal_sex, 
-                       a.availability, GROUP_CONCAT(d.disp_desc) as dispositions
-                FROM Animals a
-                LEFT JOIN AnimalDispositions ad ON a.animal_id = ad.animal_id
-                LEFT JOIN Dispositions d ON ad.disposition_id = d.disp_id
-                WHERE a.animal_id = %s
-                GROUP BY a.animal_id
-            """, (animal_id,))
-            updated_record = cursor.fetchone()
-
-            if updated_record:
-                response = {
-                    "animal_id": updated_record[0],
-                    "animal_name": updated_record[1],
-                    "species": updated_record[2],
-                    "age": updated_record[3],
-                    "animal_sex": updated_record[4],
-                    "availability": updated_record[5],
-                    "dispositions": updated_record[6] or ""
-                }
-                return jsonify(response), 200
+            # get ID for animal profile that was just created
+            animal_query = """
+                SELECT animal_id FROM Animals WHERE date = %s AND animal_name = %s AND animal_sex = %s
+                AND age = %s AND species = %s AND availability = %s and description = %s;
+                """
+            cursor.execute(animal_query, (date, name, sex_char, age, species_id, avail_id, description))
+            data = cursor.fetchone()
+            if data:
+                animal_id = data['animal_id']
             else:
-                return jsonify({"error": "Animal not found after update"}), 404
+                animal_id = None
 
+            # add each disposition for new animal profile
+            for disp_desc in disposition:
+                disp_desc_query = "SELECT disp_id from Dispositions WHERE disp_desc = %s;"
+                cursor.execute(disp_desc_query, (disp_desc,))
+                data = cursor.fetchone()
+                if data:
+                    disp_id = data['disp_id']
+                else:
+                    disp_id = None
+
+                disp_query = "INSERT INTO AnimalDispositions (animal_id, disposition_id) VALUES (%s, %s);"
+                cursor.execute(disp_query, (animal_id, disp_id))
+                connection.commit()
+
+            connection.commit()
+            return jsonify(success=True, message="New profile successfully created!"), 201
     except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"Error": str(e)}), 500
+    finally:
+        connection.close()
 
+
+@app.route('/admin/edit-profile', methods=['PUT'])
+def update_animal():
+    animal_data = request.get_json()
+
+    if not animal_data:
+        return jsonify({"error": "No data provided"}), 400
+
+    animal_id = animal_data.get('animal_id')
+    #date = animal_data.get('date')
+    name = animal_data.get('name')
+    sex = animal_data.get('sex')
+    age = animal_data.get('age')
+    species = animal_data.get('species')
+    availability = animal_data.get('status')
+    disposition = list(set(animal_data.get('selectedTraits', [])))
+    description = animal_data.get('description')
+
+    #formatted_date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+
+    if not animal_id:
+        return jsonify({"error": "No animal_id provided"}), 400  # Ensure animal_id is provided
+
+    connection = db_connection()
+    try:
+        with connection.cursor() as cursor:
+
+            if sex == "M":
+                sex_char = 'M'
+            if sex == "F":
+                sex_char = 'F'
+
+            # get corresponding ID for species string
+            species_query = "SELECT species_id from Species where species_desc = %s;"
+            cursor.execute(species_query, species)
+            data = cursor.fetchone()
+            if data:
+                species_id = data['species_id']
+            else:
+                species_id = None
+
+            # get corresponding ID for availability string
+            avail_query = "SELECT avail_id from Availability where avail_desc = %s;"
+            cursor.execute(avail_query, availability)
+            data = cursor.fetchone()
+            if data:
+                avail_id = data['avail_id']
+            else:
+                avail_id = None
+
+            # update basic form fields
+            sql_query = """
+                UPDATE Animals
+                SET animal_name = %s, age = %s, animal_sex = %s, description = %s,
+                    availability = %s, species = %s
+                WHERE animal_id = %s;
+            """
+            cursor.execute(sql_query, (name, age, sex, description, avail_id, species_id, animal_id))
+
+            # add each disposition for new animal profile, make sure only 1 of each
+            for disp_desc in disposition:
+                disp_desc_query = "SELECT disp_id from Dispositions WHERE disp_desc = %s;"
+                cursor.execute(disp_desc_query, (disp_desc,))
+                data = cursor.fetchone()
+                if data:
+                    disp_id = data['disp_id']
+                else:
+                    disp_id = None
+
+                disp_query = """
+                    INSERT IGNORE INTO AnimalDispositions (animal_id, disposition_id) 
+                    VALUES (%s, %s);
+                """
+                cursor.execute(disp_query, (animal_id, disp_id))
+                connection.commit()
+
+            connection.commit()
+            return jsonify(success=True, message="Profile updated successfully!"), 201
+    except Exception as e:
+        print(f"SQL Error: {e}")  # Debugging output
+        return jsonify({"Error": str(e)}), 500
     finally:
         connection.close()
 

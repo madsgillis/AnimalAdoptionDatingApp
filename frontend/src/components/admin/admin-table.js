@@ -81,6 +81,13 @@ const AdminTable = ({data, searchTerm}) =>{
         setShow(true); // Open the modal
     };
 
+    // handle if edit profile was selected
+    const [isEditing, setIsEditing] = useState(false);
+    const toggleEditMode = () => {
+        setIsEditing(!isEditing);
+      };
+    
+      /*
     // Fetch initial data when component mounts
     useEffect(() => {
         fetchAnimalData();
@@ -96,7 +103,7 @@ const AdminTable = ({data, searchTerm}) =>{
             console.error('Error fetching animal data:', error);
         }
     };
-    
+    */
     /*// Function to handle updating data
     const postUpdatedData = async (data) => {
         try {
@@ -120,12 +127,12 @@ const AdminTable = ({data, searchTerm}) =>{
     };
 
     */
-    // handle closing of modal
-    const handleClose = () => {
+    function handleClose() {
         setShow(false);
         setSelectedAnimal(null); // Clear the selected animal when closing
-    };
-
+    }
+    
+    /*
     const onUpdate = async () => {
         // Call fetch to get updated data from the backend
         const response = await fetch('http://127.0.0.1:5000/admin');
@@ -133,7 +140,7 @@ const AdminTable = ({data, searchTerm}) =>{
         const updatedData = await response.json();
         setCurrentDataNow(updatedData);  // Update the state with the new data
     };
-
+    */
   
     return (
         <Container fluid>
@@ -178,7 +185,9 @@ const AdminTable = ({data, searchTerm}) =>{
                                                         <i className="bi bi-pencil"></i> Edit
                                                     </button>
                                                     <EditProfile
-                                                            onUpdate={onUpdate}
+                                                            isEditing={isEditing}
+                                                            onToggleEditMode={toggleEditMode}
+                                                            /*onUpdate={onUpdate}*/
                                                             profileData={selectedAnimal}
                                                             show={show} onHide={handleClose} handleClose={handleClose} 
                                                             title="Edit Profile"

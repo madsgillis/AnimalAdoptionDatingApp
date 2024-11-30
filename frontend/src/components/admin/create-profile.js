@@ -9,7 +9,19 @@ import Form from 'react-bootstrap/Form';
 import ProfileForm from './profile-form';
 import Button from 'react-bootstrap/Button';
 
-function CreateProfile({children, handleClose, show, props}) {
+function CreateProfile({children, handleClose, show, props, onSubmit}) {
+
+    const [formData, setFormData] = useState({
+        date: '',
+        name: '',
+        sex: '',
+        age: '',
+        species: '',
+        status: '',
+        selectedTraits: [],
+        description: ''
+    });
+
     return(
         <div>
             <Modal show={show} onHide={handleClose} 
@@ -21,11 +33,11 @@ function CreateProfile({children, handleClose, show, props}) {
                     <Modal.Title id="contained-modal-title-vcenter">Create Animal Profile</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <ProfileForm/>
+                    <ProfileForm onSubmit={onSubmit} handleClose={handleClose} mode="create"/>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>Close</Button>
-                    <Button variant="primary" onClick={handleClose}>Add Profile</Button>
+                    {/*<Button variant="primary" onClick={handleClose}>Add Profile</Button>*/}
                 </Modal.Footer>
             </Modal>
         </div>
@@ -33,25 +45,3 @@ function CreateProfile({children, handleClose, show, props}) {
 }
 
 export default CreateProfile;
-
-
-/*
-const dialogRef = useRef(null);
-        const handleClose = () => {
-            dialogRef.current.close();
-            onClose();
-        }
-
-<dialog ref={dialogRef} open={open} className="create-profile-dialog">
-            <div className="create-profile-header">
-                <h4>Animal Profile</h4>
-                <button onClick={handleClose}> &times;</button>
-            </div>
-            <div className="create-profile-body">
-                {children}
-            </div>
-            <div className="create-profile-footer">
-                <button onClick={handleClose}>Close</button>
-                <button>Save changes</button>
-            </div>
-        </dialog>*/

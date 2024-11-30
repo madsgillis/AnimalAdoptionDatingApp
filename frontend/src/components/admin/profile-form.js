@@ -4,7 +4,7 @@
 // 3. For auto complete React search options: https://www.geeksforgeeks.org/react-suite-autocomplete-combined-with-inputgroup/?ref=oin_asr8
 import React, {useState, useEffect} from 'react';
 import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Form';
+/*import Button from 'react-bootstrap/Form';*/
 import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -12,128 +12,257 @@ import { AutoComplete, Input} from "rsuite";
 import RSuiteInputGroup from 'rsuite/InputGroup';
 import SearchIcon from '@rsuite/icons/Search';
 import { MDBDatepicker } from 'mdb-react-ui-kit';
-
+import Button from 'react-bootstrap/Button';
+import useFetchData from './use-fetch-data';
 
 // custom helpers
 import StatusTag from '../helpers/StatusTag.js';
 
-const ProfileForm = ({onUpdate, formData, setFormData}) => {
-    console.info('On ProfileForm: Here is the pre-edit data:', formData)
-    console.log("setFormData is: on profile form: ", setFormData);
+const ProfileForm = ({formDataEdit, setFormDataEdit, onSubmit, handleClose, isEditing, onToggleEditMode, mode}) => {
     
-    /*useEffect(() => {
-        // Only set the form data if it's not already initialized or if it's different
-        if (formData && !formData.name) {  // Assuming formData should have a 'name' field that will always exist when it's set
-            setFormData(formData); // Initialize the form with provided data
-        }
-    }, [formData]); 
-    */
-    // fill in values if in editing mode
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({
-          ...prevData,
-          [name]: value
-        }));
-      };
-    
-    //console.info('On ProfileForm: Here is the name object:', formData.prevData.name)
-    //console.info('On ProfileForm: Here is the animal sex:', formData.prevData.animal_sex)
-
-    const statusOptions = ['Available', 'Adopted', 'On Hold', 'Currently Unavailable'];
-    const sexOptions = ['F', 'M'];
+    /* SETTING STATES */
     const dispositionTraitsList = ['Shy', 'Calm', 'Family Friendly', 'Sassy', 'Independent', 'Social', 'Affectionate', 'Loyal', 'Trainable',
                                 'Energetic', 'Stubborn', 'Protective', 'Working Dog', 'Anxious', 'Attached', 'Vocal', 'Curious', 'Active', 'Playful', 'Adaptable']
-
+    const statusOptions = ['Available', 'Adopted', 'On Hold', 'Currently Unavailable'];
+    const sexOptions = ['F', 'M'];
     const [dispositionTraits, setDispositionTraits] = useState(dispositionTraitsList);
     const [selectedTraits, setSelectedTraits] = useState([]);
+    
+    /* ============ Default form state for CREATE and EDIT =================================== */
+        const [formData, setFormData] = useState({
+            animal_id: '',
+            date: '',
+            name: '',
+            sex: '',
+            age: '',
+            species: '',
+            status: '',
+            selectedTraits: [],
+            description: ''
+        });
+    
+        console.log("edited form data", formDataEdit);
 
-    // when prevData is updated for edit, display these traits:
+
+    /* ============ EDIT MODE: fix trait formatting and set form data fields (otherwise default above) =================================== */
     useEffect(() => {
-        if (formData && formData.dispositions) {
-            setSelectedTraits(formData.dispositions.split(',')); // Assuming dispositions are a comma-separated string
+        if (mode == "edit" && formDataEdit) {
+
+            // Normalize selected traits string 
+            const normalizedTraits = Array.isArray(formDataEdit.selectedTraits)
+            ? formDataEdit.selectedTraits
+            : formDataEdit.selectedTraits ? formDataEdit.selectedTraits.split(',') : [];
+
+            // format date for display:
+            const formattedDate = reformatDate(formDataEdit.date);
+            console.log(formattedDate);
+            
+            // set profile data that will be edited
+            setFormData({
+                animal_id: formDataEdit.animal_id,
+                date: formattedDate || '',
+                name: formDataEdit.name || '',
+                sex: formDataEdit.animal_sex || '',
+                age: formDataEdit.age || '',
+                species: formDataEdit.species || '',
+                status: formDataEdit.availability || '',
+                selectedTraits: normalizedTraits || [],
+                description: formDataEdit.description || '',
+            });
         }
-    }, [formData]);
+    }, [mode, formDataEdit]);
 
     /* Selecting disposition traits   */
     const handleTraitClick = (trait) => {
-        setSelectedTraits((prevSelected) => {
-            if (prevSelected.includes(trait)) {
-                // Deselect the trait
-                return prevSelected.filter((t) => t !== trait);
+        setFormData((prevData) => {
+            const { selectedTraits } = prevData;
+            if (selectedTraits.includes(trait)) {
+                // Deselect the trait if already selected
+                return { ...prevData, selectedTraits: selectedTraits.filter((t) => t !== trait)};
             } else {
                 // Select the trait
-                return [...prevSelected, trait];
+                return { ...prevData, selectedTraits: [...selectedTraits, trait] };
             }
         });
     };
+    /* ===================================================================================== */
+
+    /* HANDLE CHANGE for EDIT and CREATE */
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+
+    // Handle change for selecting traits for edit display
+    useEffect(() => {
+        if (formData && formData.selectedTraits) {
+            setSelectedTraits(formData.selectedTraits); // Assuming dispositions are a comma-separated string
+        }
+    }, [formData]);
     
-    // submit form 
-    /*const handleSubmit = async (e) => {
-        e.preventDefault(); // Prevent default form submission
 
-        const updatedData = {
-            ...formData.prevData,
-            dispositions: selectedTraits.join(','), // Convert selected traits to a string
-            
+    /* ============ SWITCH TO EDIT OR CREATE MODE FORM SUBMISSION =================================== */
+    function handleForm() {
+        if (mode == "edit") {
+            handleEdit();
+        } else {
+            handleSubmit();  // Call the create handler if in create mode
+        }
+    }
+    
 
-            // Include other fields as needed
-        };
+    /* ============ EDIT (PUT and GET) =================================== */
+    const handleEdit = async (e) => {
+
+        console.log("Form submitted"); // debug
+        handleClose();
 
         try {
             const response = await fetch('http://127.0.0.1:5000/admin/edit-profile', {
-                method: 'PUT', // or 'POST' depending on your API
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(updatedData),
+                body: JSON.stringify(formData),
             });
 
+            // debug
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                console.error("Failed to create profile, status: ", response.status, response.statusText);
+                const errorText = await response.text();
+                console.error("Error response body: ", errorText);
+                return;
             }
 
-            const result = await response.json();
-            console.log('Update successful:', result);
-            onUpdate(); // Call a function to refresh data or close modal
+            const data = await response.json();
+            console.log("Profile updated successfully:", data.message);
+
+            if (response.ok) {
+                // reset form
+                setFormData({
+                    animal_id: '',
+                    date: '',
+                    name: '',
+                    sex: '',
+                    age: '',
+                    species: '',
+                    status: '',
+                    selectedTraits: [],
+                    description: ''}
+                );
+                console.log("profile updated successfully created!");
+                handleClose();
+            } else {
+                console.error("Failed to edit profile.");
+            }
         } catch (error) {
-            console.error('Error updating data:', error);
+            console.error("There was an error: ", error);
         }
     };
-    */
+    /* ==================================================================== */
 
+
+
+     /* ============== REFETCH PAGE AFTER EDIT ============================================== */
+    const { data, error } = useFetchData('http://127.0.0.1:5000/admin');
+
+    if (error) {
+        return <div>Error: {error.message}</div>;
+    }
+    /* ======================================================================================= */
+
+
+
+    /* ============ CREATE (POST) =================================== */
+    const handleSubmit = async (e) => {
+
+        console.log("Form submitted"); // debug
+        handleClose();
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/admin/create-profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            // debug
+            if (!response.ok) {
+                console.error("Failed to create profile, status: ", response.status, response.statusText);
+                const errorText = await response.text();
+                console.error("Error response body: ", errorText);
+                return;
+            }
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // reset form
+                setFormData({
+                    date: '',
+                    name: '',
+                    sex: '',
+                    age: '',
+                    species: '',
+                    status: '',
+                    selectedTraits: [],
+                    description: ''}
+                );
+                console.log("New profile successfully created!");
+                handleClose();
+            } else {
+                console.error("Failed to create profile.");
+            }
+        } catch (error) {
+            console.error("There was an error: ", error);
+        }
+    };
+    /* ==================================================================== */
+
+    /* HELPER FUNCTION FOR FORMATTING DATE */
+    function reformatDate(dateString) {
+        const date = new Date(dateString); // Parse the date string
+        const year = date.getFullYear(); // Get the year
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Get the month (0-indexed, so add 1)
+        const day = String(date.getDate()).padStart(2, '0'); // Get the day
+    
+        return `${year}-${month}-${day}`; // Return in YYYY-MM-DD format
+    }
     
     return (
         <Form>
             {/* Date picker */}
             <Form.Group className="mb-4">
                 <Form.Label>Today's Date</Form.Label>
-                <Form.Control name="date" type="date" value={formData.date} onChange={handleInputChange}/>
+                <Form.Control name="date" type="date" value={formData.date ? formData.date.split('T')[0] : ''} onChange={handleChange} required/>
             </Form.Group>
             {/* NAME text input */}
             <Form.Group className="mb-4" controlId="formBasicEmail">
                 <Form.Label>Name</Form.Label>
                 <Form.Control type="text" name="name" placeholder="Enter name" value={formData.name}
-                            onChange={handleInputChange}/>
+                            onChange={handleChange}/>
             </Form.Group>
             
             {/* ROW: Gender, Age, Species */}
             <Row className= "mb-2">
-                    {/* Gender: radio selection  */}
                     <Form.Group as={Col} sm={4}>
                         <Form.Label>Animal's Sex</Form.Label>
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center'}}>
-                        {sexOptions.map((status, index) => (
+                        {sexOptions.map((sex, index) => (
                         <div key={`status-${index}`}className="mb-3" style={{ display: 'flex', alignItems: 'center' }}>
                             <Form.Check
                                 inline
-                                name="animal_sex"
+                                key={`sex-${index}`}
+                                name="sex"
                                 type="radio"
-                                id={`status-${index}`}
-                                label={status}
-                                value={status} 
-                                checked={formData.animal_sex === status}
-                                onChange={handleInputChange}
+                                value={sex}
+                                onChange={handleChange}
+                                checked={formData.sex === sex}
+                                label={sex}
+                                required
                             />
                         </div>
                         ))}
@@ -148,7 +277,7 @@ const ProfileForm = ({onUpdate, formData, setFormData}) => {
                             placeholder="ex. 5"
                             name="age"
                             value={formData.age}
-                            onChange={handleInputChange}
+                            onChange={handleChange}
                             />
                             <InputGroup.Text id="basic-addon2">years old</InputGroup.Text>
                         </InputGroup>
@@ -157,9 +286,13 @@ const ProfileForm = ({onUpdate, formData, setFormData}) => {
                     {/* Species selection  */}
                     <Form.Group as={Col} sm={4} controlId="formBasicEmail">
                         <Form.Label>Species</Form.Label>
-                        <Form.Select defaultValue="Select" value={formData.species} 
-                            onChange={handleInputChange}>
-                            <option value="">Select</option>
+                        <Form.Select
+                            name="species"
+                            value={formData.species}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option>Select</option>
                             <option value="Dog">Dog</option>
                             <option value="Cat">Cat</option>
                             <option value="Bird">Bird</option>
@@ -173,18 +306,18 @@ const ProfileForm = ({onUpdate, formData, setFormData}) => {
             <Form.Group className="mb-4">
                 <Form.Label>Adoption Status</Form.Label>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                {statusOptions.map((status, index) => (
+                {statusOptions.map((element, index) => (
                 <div key={`status-${index}`}className="mb-3" style={{ display: 'flex', alignItems: 'center' }}>
-                    <Form.Check
+                <Form.Check
                         inline
+                        checked={formData.status === element}
+                        key={`status-${index}`}
                         name="status"
                         type="radio"
-                        id={`status-${index}`}
-                        label={<StatusTag status={status}/>}
-                        defaultChecked={index === 0}
-                        value={status} 
-                        checked={formData.availability === status}
-                        onChange={handleInputChange}
+                        value={element}
+                        onChange={handleChange}
+                        label={<StatusTag status={element}/>}
+                        required
                     />
                 </div>
                 ))}
@@ -201,14 +334,17 @@ const ProfileForm = ({onUpdate, formData, setFormData}) => {
                             {dispositionTraits.map((trait, index) => (
                                 <Button
                                     key={`trait-${index}`}
-                                    variant={selectedTraits.includes(trait) ? 'primary' : 'outline-primary'}
-                                    onClick={() => handleTraitClick(trait)}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleTraitClick(trait);
+                                    }}
+                                    variant={formData.selectedTraits.includes(trait) ? 'primary' : 'outline-primary'}
                                     style={{
                                         padding: '10px 20px',
                                         fontSize: '14px',
                                         borderRadius: '20px', // More rounded corners for a softer look
-                                        backgroundColor: selectedTraits.includes(trait) ? '#007bff' : '#f8f9fa',
-                                        color: selectedTraits.includes(trait) ? 'white' : '#007bff',
+                                        backgroundColor: formData.selectedTraits.includes(trait) ? '#007bff' : '#f8f9fa',
+                                        color: formData.selectedTraits.includes(trait) ? 'white' : '#007bff',
                                         cursor: 'pointer',
                                         transition: 'background-color 0.3s, transform 0.2s', // Smooth transition
                                         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Subtle shadow
@@ -219,7 +355,7 @@ const ProfileForm = ({onUpdate, formData, setFormData}) => {
                             ))}
                         </div>
                         <div style={{ marginTop: '10px' }}>
-                            <strong>Selected Traits:</strong> {selectedTraits.join(', ')}
+                            <strong>Selected Traits:</strong> {formData.selectedTraits.join(', ')}
                         </div>
                 </Form.Group>
             </Row>
@@ -230,7 +366,7 @@ const ProfileForm = ({onUpdate, formData, setFormData}) => {
                     <InputGroup.Text>Description of Animal</InputGroup.Text>
                     <Form.Control as="textarea" aria-label="With textarea"
                     name="description" value={formData.description}
-                    onChange={handleInputChange} />
+                    onChange={handleChange} />
                 </InputGroup>
             </Form.Group>
 
@@ -239,10 +375,13 @@ const ProfileForm = ({onUpdate, formData, setFormData}) => {
                 <Form.Label>Profile Picture</Form.Label>
                 <Form.Control type="file" />
             </Form.Group>
+            
+            <Button variant="primary" type="submit" onClick={handleForm}>
+                {mode === 'edit' ? 'Save Changes' : 'Create'}
+            </Button>
         </Form>
     );
-
 }
 
-export default ProfileForm;
 
+export default ProfileForm;

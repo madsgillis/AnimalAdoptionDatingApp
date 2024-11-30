@@ -7,6 +7,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import './admin.css'
+import useFetchData from './use-fetch-data';
 
 // icons
 import { Plus } from 'react-bootstrap-icons';
@@ -16,7 +17,6 @@ import { MDBBtn, MDBInputGroup, MDBInput, MDBIcon } from 'mdb-react-ui-kit';
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-
 
     // set and save search term to send to table:
     const [searchTerm, setSearchTerm] = useState(''); // State for the search term
@@ -29,7 +29,7 @@ import { MDBBtn, MDBInputGroup, MDBInput, MDBIcon } from 'mdb-react-ui-kit';
     const [showSearchAlert, setShowSearchAlert] = useState(false);
 
     // fetching data for admin table
-        /* fetching and posting data */
+        /* fetching and posting data 
         const [data, setData] = useState([]);
         useEffect(() => {
             const fetchData = async () => {
@@ -57,7 +57,13 @@ import { MDBBtn, MDBInputGroup, MDBInput, MDBIcon } from 'mdb-react-ui-kit';
 
             fetchData();
         }, []);
+        */
+    
+    const { data, error } = useFetchData('http://127.0.0.1:5000/admin');
 
+    if (error) {
+        return <div>Error: {error.message}</div>;
+    }
 
     if (data.length === 0) return <p>No data available.</p>;
 
