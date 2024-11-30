@@ -28,14 +28,13 @@ import { MDBBtn, MDBInputGroup, MDBInput} from 'mdb-react-ui-kit';
     };
     /* ========================================= */
 
-
      /* =========== FETCH (GET) TABLE DATA ==================== */
     const { data, error } = useFetchData('http://127.0.0.1:5000/admin');
     if (error) {
         return <div>Error: {error.message}</div>;
     }
     if (data.length === 0) return <p>No data available.</p>;
-    /* ========================================= */
+    /* ====================================================== */
     
     return (
     <Container fluid="md" className="mb-3">

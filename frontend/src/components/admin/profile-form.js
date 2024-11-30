@@ -16,7 +16,7 @@ import useFetchData from './use-fetch-data';
 /*
     HANDLES FORM FOR CREATING AND UPDATING DATA, SENDS REQUESTS TO BACKEND
 */
-const ProfileForm = ({formDataEdit, handleClose, mode}) => {
+const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
     
     /* SETTING STATES */
     const dispositionTraitsList = ['Shy', 'Calm', 'Family Friendly', 'Sassy', 'Independent', 'Social', 'Affectionate', 'Loyal', 'Trainable',
@@ -25,6 +25,7 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
     const sexOptions = ['F', 'M'];
     const [dispositionTraits, setDispositionTraits] = useState(dispositionTraitsList);
     const [selectedTraits, setSelectedTraits] = useState([]);
+    const [validated, setValidated] = useState(false);
     
     /* ============ Default form state for CREATE and EDIT =================================== */
         const [formData, setFormData] = useState({
@@ -87,7 +88,6 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
         setFormData({ ...formData, [name]: value });
     };
 
-
     // Handle change for selecting traits for edit display
     useEffect(() => {
         if (formData && formData.selectedTraits) {
@@ -97,13 +97,21 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
     
 
     /* ============ SWITCH TO EDIT OR CREATE MODE FORM SUBMISSION =================================== */
-    function handleForm() {
-        if (mode == "edit") {
-            handleEdit();
+    const handleForm = (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (form.checkValidity() === false) {
+            event.stopPropagation();
         } else {
-            handleSubmit();  // Call the create handler if in create mode
+            if (mode === "edit") {
+                handleEdit();
+            } else {
+                handleSubmit();
+            }
+            handleClose(); // Only close the form if it is valid
         }
-    }
+        setValidated(true);
+    };
     
 
     /* ============ EDIT (PUT and GET) =================================== */
@@ -218,17 +226,25 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
     /* ==================================================================== */
 
     return (
-        <Form>
+        <Form noValidate validated={validated} onSubmit={handleForm}>
             {/* Date picker */}
             <Form.Group className="mb-4">
                 <Form.Label>Profile Start Date</Form.Label>
-                <Form.Control name="date" type="datetime-local" value={formData.date} onChange={handleChange} required/>
+                <Form.Control  controlId="validationCustom01" name="date" type="datetime-local" value={formData.date} onChange={handleChange} required/>
+                <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+                <Form.Control.Feedback type="invalid">
+                    Please select a date.
+                </Form.Control.Feedback>
             </Form.Group>
             {/* NAME text input */}
             <Form.Group className="mb-4" controlId="formBasicEmail">
                 <Form.Label>Name</Form.Label>
                 <Form.Control type="text" name="name" placeholder="Enter name" value={formData.name}
                             onChange={handleChange} required/>
+                <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+                <Form.Control.Feedback type="invalid">
+                    Please provide a name.
+                </Form.Control.Feedback>
             </Form.Group>
             
             {/* ROW: Gender, Age, Species */}
@@ -252,12 +268,16 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
                         </div>
                         ))}
                         </div>
+                        <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">
+                            Please select a sex
+                        </Form.Control.Feedback>
                     </Form.Group>
                     
                     {/* Age: text input */}
                     <Form.Group as={Col} sm={4}>
                         <Form.Label>Age</Form.Label>
-                        <InputGroup className="mb-3">
+                        <InputGroup hasValidation className="mb-3">
                             <Form.Control
                             placeholder="ex. 5"
                             name="age"
@@ -266,6 +286,10 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
                             required
                             />
                             <InputGroup.Text id="basic-addon2">years old</InputGroup.Text>
+                            <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">
+                            Please provide an estimated age.
+                        </Form.Control.Feedback>
                         </InputGroup>
                     </Form.Group>
                     
@@ -278,12 +302,16 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
                             onChange={handleChange}
                             required
                         >
-                            <option>Select</option>
+                            <option value="" disabled>Select a species</option>
                             <option value="Dog">Dog</option>
                             <option value="Cat">Cat</option>
                             <option value="Bird">Bird</option>
                             <option value="Other">Other</option>
                         </Form.Select>
+                        <Form.Control.Feedback type="invalid">
+                            Please select which species.
+                        </Form.Control.Feedback>
+                        <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
                     </Form.Group>
             </Row>
             
@@ -308,6 +336,10 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
                 </div>
                 ))}
                 </div>
+                <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+                <Form.Control.Feedback type="invalid">
+                            Please provide the animal status.
+                        </Form.Control.Feedback>
             </Form.Group>
             
             {/* Disposition */}
@@ -315,7 +347,7 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
             <Row className="mb-4" rounded style={{ backgroundColor: '#f0f0f0', padding: '15px', borderRadius: '8px' }}>
                 <Form.Group>
                         <Form.Label style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Disposition</Form.Label>
-                        <Form.Text style={{ fontStyle: 'italic' }}>    --- Select the traits that best describe this animal</Form.Text>
+                        <Form.Text style={{ fontStyle: 'italic' }}>    --- Select at least 1 trait that best describe this animal</Form.Text>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                             {dispositionTraits.map((trait, index) => (
                                 <Button
@@ -344,6 +376,10 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
                         <div style={{ marginTop: '10px' }}>
                             <strong>Selected Traits:</strong> {formData.selectedTraits.join(', ')}
                         </div>
+                        <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">
+                            Please select at least one trait.
+                        </Form.Control.Feedback>
                 </Form.Group>
             </Row>
             {/* Animal Description as user input */}
@@ -355,6 +391,7 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
                     name="description" value={formData.description}
                     onChange={handleChange} />
                 </InputGroup>
+                <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
             </Form.Group>
 
             {/* Upload animal photo here */}
@@ -363,7 +400,7 @@ const ProfileForm = ({formDataEdit, handleClose, mode}) => {
                 <Form.Control type="file" />
             </Form.Group>
             
-            <Button variant="primary" type="submit" onClick={handleForm}>
+            <Button  variant="primary" type="submit">
                 {mode === 'edit' ? 'Save Changes' : 'Create'}
             </Button>
         </Form>

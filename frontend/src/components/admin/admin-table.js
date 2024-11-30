@@ -32,7 +32,6 @@ let totalProfiles = 0;
 
 // display main admin table
 const AdminTable = ({data, searchTerm}) =>{
-    
     // State to keep track of current page
     const [itemsPerPage, setItemsPerPage] = useState(5);  // default is 5
     const [currentPage, setCurrentPage] = useState(1);
@@ -83,6 +82,45 @@ const AdminTable = ({data, searchTerm}) =>{
         setSelectedAnimal(null); // Clear the selected animal when closing
     }
 
+    /* 
+        DELETE ANIMAL PROFILE 
+    */
+    const DeleteProfile = async (animalId) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/admin/delete-profile/${animalId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            const result = await response.json();
+            if (response.ok) {
+                console.log(result.message);
+                setSuccessMessage(result.message); // confirm user
+            } else {
+                console.error(result.Error);
+                // Handle error (e.g., show error message)
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            // Handle network error
+        }
+    };
+
+    const [successMessage, setSuccessMessage] = useState('');
+    // update success message
+    useEffect(() => {
+        if (successMessage) {
+            // Show popup message
+            alert(successMessage);
+            // Clear the success message after showing the popup
+            setSuccessMessage('');
+        }
+    }, [successMessage]);
+
+
+     /* =========== FETCH (GET) TABLE DATA ==================== */
     return (
         <Container fluid>
             <div id="adminTableWrapper">
@@ -133,7 +171,7 @@ const AdminTable = ({data, searchTerm}) =>{
                                                     </EditProfile>
                                                 </td>
                                                 <td>
-                                                    <button className="btn btn-danger">
+                                                    <button className="btn btn-danger" onClick={() => DeleteProfile(animal.animal_id)}>
                                                         <i className="bi bi-trash"></i> Delete
                                                     </button>
                                                 </td>

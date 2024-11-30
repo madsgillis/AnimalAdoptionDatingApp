@@ -35,7 +35,7 @@ function useFetchData(url) {
         fetchData();
     }, [url]);  // Dependency array ensures it re-fetches when the URL changes
 
-    return { data, error };
+    return {data, error};
 }
 
 export default useFetchData;

@@ -165,6 +165,7 @@ def create_profile():
     finally:
         connection.close()
 
+# EDIT (PUT)
 @app.route('/admin/edit-profile', methods=['PUT'])
 def update_animal():
     animal_data = request.get_json()
@@ -223,7 +224,7 @@ def update_animal():
             cursor.execute(sql_query, (name, age, sex, description, avail_id, species_id, formatted_date, animal_id))
 
             # add each disposition for new animal profile, make sure only 1 of each
-            for disp_desc in disposition:
+            for disp_desc in set(disposition):
                 disp_desc_query = "SELECT disp_id from Dispositions WHERE disp_desc = %s;"
                 cursor.execute(disp_desc_query, (disp_desc,))
                 data = cursor.fetchone()
@@ -247,6 +248,26 @@ def update_animal():
     finally:
         connection.close()
 
+# DELETE
+@app.route('/admin/delete-profile/<int:animal_id>', methods=['DELETE'])
+def delete_profile(animal_id):
+    connection = db_connection()
+    try:
+        with connection.cursor() as cursor:
+            # Delete dispositions associated with the animal
+            delete_dispositions_query = "DELETE FROM AnimalDispositions WHERE animal_id = %s;"
+            cursor.execute(delete_dispositions_query, (animal_id,))
+            
+            # Delete the animal profile
+            delete_animal_query = "DELETE FROM Animals WHERE animal_id = %s;"
+            cursor.execute(delete_animal_query, (animal_id,))
+            
+            connection.commit()
+            return jsonify(success=True, message="Profile successfully deleted!"), 200
+    except Exception as e:
+        return jsonify({"Error": str(e)}), 500
+    finally:
+        connection.close()
 
 # Homepage
 @app.route('/')
