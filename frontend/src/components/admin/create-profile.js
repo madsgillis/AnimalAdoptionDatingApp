@@ -2,26 +2,15 @@
 // 1. For using Modal React-Bootstrap: https://react-bootstrap.netlify.app/docs/components/modal/
 // 2. For using Form React-Boostrap: https://react-bootstrap.netlify.app/docs/forms/overview
 
-import React, {useRef, useEffect, useState} from 'react';
-//import '../../App.css';
+import React from 'react';
 import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
 import ProfileForm from './profile-form';
 import Button from 'react-bootstrap/Button';
 
-function CreateProfile({children, handleClose, show, props, onSubmit}) {
-
-    const [formData, setFormData] = useState({
-        date: '',
-        name: '',
-        sex: '',
-        age: '',
-        species: '',
-        status: '',
-        selectedTraits: [],
-        description: ''
-    });
-
+/* 
+CREATES ANIMAL PROFILE AND FORM CAN BE FOUND IN ProfileForm
+*/
+function CreateProfile({handleClose, show, props, onSubmit}) {
     return(
         <div>
             <Modal show={show} onHide={handleClose} 
@@ -37,7 +26,6 @@ function CreateProfile({children, handleClose, show, props, onSubmit}) {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>Close</Button>
-                    {/*<Button variant="primary" onClick={handleClose}>Add Profile</Button>*/}
                 </Modal.Footer>
             </Modal>
         </div>

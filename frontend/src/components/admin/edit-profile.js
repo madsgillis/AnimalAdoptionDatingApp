@@ -1,18 +1,14 @@
-import React, {useRef, useEffect, useState} from 'react';
-//import '../../App.css';
+import React, {useEffect, useState} from 'react';
 import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
 import ProfileForm from './profile-form';
 import Button from 'react-bootstrap/Button';
 
 
-const EditProfile = ({children, handleClose, show, props, profileData, /*onUpdate *//*isEditing, onToggleEditMode*/}) => {
-
-    /* keep track of editing mode */
-    const [isEditing, setIsEditing] = useState(true); 
-
-    console.info('On editProfile: Here is the pre-edit data:', profileData)
-    // Default form data state
+const EditProfile = ({handleClose, show, props, profileData}) => {
+    
+    /*
+    SET DEFAULT FORM DATA AND IF PROFILEDATA OBJ EXISTS, UPDATE FIELDS IN FORMDATA
+    */
     const [formData, setFormData] = useState({
         animal_id: '',
         name: '',
@@ -26,12 +22,11 @@ const EditProfile = ({children, handleClose, show, props, profileData, /*onUpdat
         description: ''
     });
 
-    // setting form data for edit 
+    // UPDATING FIELDS WITH PROFILE DATA FETCHED
     useEffect(() => {
         console.log('profileData:', profileData);
         if (profileData) {
-            const formattedDate = formData.date ? new Date(formData.date).toISOString().split('T').join(' ').split('Z')[0] : null;
-
+            
             setFormData({
                 animal_id: profileData.animal_id,
                 name: profileData.animal_name,
@@ -41,7 +36,7 @@ const EditProfile = ({children, handleClose, show, props, profileData, /*onUpdat
                 animal_sex: profileData.animal_sex,
                 age: profileData.age,
                 selectedTraits: profileData.dispositions,
-                date: formattedDate,
+                date: profileData.date,
                 description: profileData.description
             });
         } else {    // else empty form data
@@ -60,7 +55,6 @@ const EditProfile = ({children, handleClose, show, props, profileData, /*onUpdat
         }
     }, [profileData]);
 
-    console.log("setFormData in ParentComponent: edit-profile", setFormData);
     return(
         <div>
             <Modal show={show} onHide={handleClose} 
@@ -72,13 +66,11 @@ const EditProfile = ({children, handleClose, show, props, profileData, /*onUpdat
                     <Modal.Title id="contained-modal-title-vcenter">Edit Animal Profile</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <ProfileForm handleClose={handleClose} /*onUpdate={onUpdate} */formDataEdit={formData} setFormData={setFormData} isEditing={isEditing}
-                        onToggleEditMode={() => setIsEditing(!isEditing)}
+                    <ProfileForm handleClose={handleClose} formDataEdit={formData} setFormData={setFormData}
                         mode="edit" />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>Close</Button>
-                    {/*<Button variant="primary" onClick={handleClick}>Save changes</Button>*/}
                 </Modal.Footer>
             </Modal>
         </div>

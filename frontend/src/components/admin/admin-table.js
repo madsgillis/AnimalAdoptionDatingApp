@@ -32,14 +32,10 @@ let totalProfiles = 0;
 
 // display main admin table
 const AdminTable = ({data, searchTerm}) =>{
-    const prevData = data;
-    console.info('On admin-table: Here is the pre-edit data:', prevData)
-
+    
     // State to keep track of current page
-    const [itemsPerPage, setItemsPerPage] = useState(3);  // default is 3
+    const [itemsPerPage, setItemsPerPage] = useState(5);  // default is 5
     const [currentPage, setCurrentPage] = useState(1);
-    //const [currentData, setCurrentData] = useState([]);
-    const [currentDataNow, setCurrentDataNow] = useState([]);
     
     // number of items per page, dependent on user drop down selection
     const handleItemsPerPageChange = (num) => {
@@ -81,67 +77,12 @@ const AdminTable = ({data, searchTerm}) =>{
         setShow(true); // Open the modal
     };
 
-    // handle if edit profile was selected
-    const [isEditing, setIsEditing] = useState(false);
-    const toggleEditMode = () => {
-        setIsEditing(!isEditing);
-      };
-    
-      /*
-    // Fetch initial data when component mounts
-    useEffect(() => {
-        fetchAnimalData();
-    }, []);
-
-    // Function to fetch animal data
-    const fetchAnimalData = async () => {
-        try {
-            const response = await fetch('http://127.0.0.1:5000/admin/edit-profile');
-            const data = await response.json();
-            setCurrentDataNow(data);
-        } catch (error) {
-            console.error('Error fetching animal data:', error);
-        }
-    };
-    */
-    /*// Function to handle updating data
-    const postUpdatedData = async (data) => {
-        try {
-            const response = await fetch('/api/animals/update', {
-                method: 'POST', // or 'PUT' if you're updating an existing record
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data), // Convert data object to JSON
-            });
-
-            if (response.ok) {
-                console.log('Data updated successfully!');
-                fetchAnimalData();  // Fetch updated data after successful update
-            } else {
-                console.error('Error updating data:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error sending updated data:', error);
-        }
-    };
-
-    */
+    // close modal for edit/create
     function handleClose() {
         setShow(false);
         setSelectedAnimal(null); // Clear the selected animal when closing
     }
-    
-    /*
-    const onUpdate = async () => {
-        // Call fetch to get updated data from the backend
-        const response = await fetch('http://127.0.0.1:5000/admin');
-        console.log("updated data: ", response);
-        const updatedData = await response.json();
-        setCurrentDataNow(updatedData);  // Update the state with the new data
-    };
-    */
-  
+
     return (
         <Container fluid>
             <div id="adminTableWrapper">
@@ -185,9 +126,6 @@ const AdminTable = ({data, searchTerm}) =>{
                                                         <i className="bi bi-pencil"></i> Edit
                                                     </button>
                                                     <EditProfile
-                                                            isEditing={isEditing}
-                                                            onToggleEditMode={toggleEditMode}
-                                                            /*onUpdate={onUpdate}*/
                                                             profileData={selectedAnimal}
                                                             show={show} onHide={handleClose} handleClose={handleClose} 
                                                             title="Edit Profile"

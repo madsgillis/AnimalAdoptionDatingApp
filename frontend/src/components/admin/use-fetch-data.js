@@ -1,3 +1,8 @@
+/*
+THIS FUNCTION GRABS THE ANIMAL PROFILE DATA AND RENDERS IT
+USED FOR ADMIN TABLE AND REFRESHING AFTER CREATING/EDITING PROFILES
+*/
+
 import { useState, useEffect } from 'react';
 
 function useFetchData(url) {

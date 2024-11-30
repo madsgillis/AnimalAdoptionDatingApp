@@ -47,7 +47,7 @@ def get_admin_data():
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT a.animal_id, a.animal_name, a.photo, s.species_desc as species, a.animal_sex, a.age, a.date, a.description,
+                SELECT a.animal_id, a.animal_name, a.photo, s.species_desc as species, a.animal_sex, a.age, DATE_FORMAT(a.date, '%Y-%m-%dT%H:%i') as date, a.description,
                 v.avail_desc as availability 
                 FROM Animals as a 
                 JOIN Availability v ON a.availability = v.avail_id 
@@ -77,44 +77,6 @@ def get_admin_data():
         return jsonify({'error': str(e)}), 500
     finally:
         connection.close()
-
-@app.route('/profile', methods=['GET'])
-def get_profile():
-    connection = db_connection()
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT a.animal_id, a.animal_name, a.photo, s.species_desc as species, a.animal_sex, a.age, a.date, a.description,
-                v.avail_desc as availability 
-                FROM Animals as a 
-                JOIN Availability v ON a.availability = v.avail_id 
-                JOIN Species as s ON a.species = s.species_id 
-                ORDER BY a.animal_id
-            """)
-            data = cursor.fetchall()
-
-            # grabbing dispositions
-            cursor.execute("""
-                SELECT ad.animal_id, GROUP_CONCAT(d.disp_desc) AS dispositions
-                FROM AnimalDispositions ad
-                JOIN Dispositions d ON ad.disposition_id = d.disp_id
-                GROUP BY ad.animal_id
-            """)
-            disposition_data = cursor.fetchall()
-
-            # combining animal table with dispositions
-            for animal in data:
-                animal_id = animal['animal_id']
-                dispositions = next((d['dispositions'] for d in disposition_data if d['animal_id'] == animal_id), None)
-                animal['dispositions'] = dispositions
-        
-            return jsonify(data), 200
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-    finally:
-        connection.close()
-
 
 @app.route('/admin/create-profile', methods=['POST'])
 def create_profile():
@@ -133,6 +95,7 @@ def create_profile():
     availability = animal_data.get('status')
     disposition = animal_data.get('selectedTraits')
     description = animal_data.get('description')
+    formatted_date = datetime.strptime(date, '%Y-%m-%dT%H:%M')
 
     connection = db_connection()
     try:
@@ -166,7 +129,7 @@ def create_profile():
                 INSERT INTO Animals (date, animal_name, animal_sex, age, species, availability, description)
                 VALUES (%s, %s, %s, %s, %s, %s, %s);
                 """
-            cursor.execute(sql_query, (date, name, sex_char, age, species_id, avail_id, description))
+            cursor.execute(sql_query, (formatted_date, name, sex_char, age, species_id, avail_id, description))
             connection.commit()
 
             # get ID for animal profile that was just created
@@ -174,7 +137,7 @@ def create_profile():
                 SELECT animal_id FROM Animals WHERE date = %s AND animal_name = %s AND animal_sex = %s
                 AND age = %s AND species = %s AND availability = %s and description = %s;
                 """
-            cursor.execute(animal_query, (date, name, sex_char, age, species_id, avail_id, description))
+            cursor.execute(animal_query, (formatted_date, name, sex_char, age, species_id, avail_id, description))
             data = cursor.fetchone()
             if data:
                 animal_id = data['animal_id']
@@ -202,7 +165,6 @@ def create_profile():
     finally:
         connection.close()
 
-
 @app.route('/admin/edit-profile', methods=['PUT'])
 def update_animal():
     animal_data = request.get_json()
@@ -211,7 +173,7 @@ def update_animal():
         return jsonify({"error": "No data provided"}), 400
 
     animal_id = animal_data.get('animal_id')
-    #date = animal_data.get('date')
+    date = animal_data.get('date')
     name = animal_data.get('name')
     sex = animal_data.get('sex')
     age = animal_data.get('age')
@@ -219,9 +181,8 @@ def update_animal():
     availability = animal_data.get('status')
     disposition = list(set(animal_data.get('selectedTraits', [])))
     description = animal_data.get('description')
-
-    #formatted_date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-
+    formatted_date = datetime.strptime(date, '%Y-%m-%dT%H:%M')
+    
     if not animal_id:
         return jsonify({"error": "No animal_id provided"}), 400  # Ensure animal_id is provided
 
@@ -256,10 +217,10 @@ def update_animal():
             sql_query = """
                 UPDATE Animals
                 SET animal_name = %s, age = %s, animal_sex = %s, description = %s,
-                    availability = %s, species = %s
+                    availability = %s, species = %s, date = %s
                 WHERE animal_id = %s;
             """
-            cursor.execute(sql_query, (name, age, sex, description, avail_id, species_id, animal_id))
+            cursor.execute(sql_query, (name, age, sex, description, avail_id, species_id, formatted_date, animal_id))
 
             # add each disposition for new animal profile, make sure only 1 of each
             for disp_desc in disposition:

@@ -4,21 +4,19 @@
 // 3. For auto complete React search options: https://www.geeksforgeeks.org/react-suite-autocomplete-combined-with-inputgroup/?ref=oin_asr8
 import React, {useState, useEffect} from 'react';
 import Form from 'react-bootstrap/Form';
-/*import Button from 'react-bootstrap/Form';*/
 import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { AutoComplete, Input} from "rsuite"; 
-import RSuiteInputGroup from 'rsuite/InputGroup';
-import SearchIcon from '@rsuite/icons/Search';
-import { MDBDatepicker } from 'mdb-react-ui-kit';
 import Button from 'react-bootstrap/Button';
-import useFetchData from './use-fetch-data';
 
 // custom helpers
 import StatusTag from '../helpers/StatusTag.js';
+import useFetchData from './use-fetch-data';
 
-const ProfileForm = ({formDataEdit, setFormDataEdit, onSubmit, handleClose, isEditing, onToggleEditMode, mode}) => {
+/*
+    HANDLES FORM FOR CREATING AND UPDATING DATA, SENDS REQUESTS TO BACKEND
+*/
+const ProfileForm = ({formDataEdit, handleClose, mode}) => {
     
     /* SETTING STATES */
     const dispositionTraitsList = ['Shy', 'Calm', 'Family Friendly', 'Sassy', 'Independent', 'Social', 'Affectionate', 'Loyal', 'Trainable',
@@ -52,15 +50,11 @@ const ProfileForm = ({formDataEdit, setFormDataEdit, onSubmit, handleClose, isEd
             const normalizedTraits = Array.isArray(formDataEdit.selectedTraits)
             ? formDataEdit.selectedTraits
             : formDataEdit.selectedTraits ? formDataEdit.selectedTraits.split(',') : [];
-
-            // format date for display:
-            const formattedDate = reformatDate(formDataEdit.date);
-            console.log(formattedDate);
             
             // set profile data that will be edited
             setFormData({
                 animal_id: formDataEdit.animal_id,
-                date: formattedDate || '',
+                date: formDataEdit.date || '',
                 name: formDataEdit.name || '',
                 sex: formDataEdit.animal_sex || '',
                 age: formDataEdit.age || '',
@@ -119,6 +113,7 @@ const ProfileForm = ({formDataEdit, setFormDataEdit, onSubmit, handleClose, isEd
         handleClose();
 
         try {
+            console.info("here is date logged into form data:", formData.date)
             const response = await fetch('http://127.0.0.1:5000/admin/edit-profile', {
                 method: 'PUT',
                 headers: {
@@ -222,28 +217,18 @@ const ProfileForm = ({formDataEdit, setFormDataEdit, onSubmit, handleClose, isEd
     };
     /* ==================================================================== */
 
-    /* HELPER FUNCTION FOR FORMATTING DATE */
-    function reformatDate(dateString) {
-        const date = new Date(dateString); // Parse the date string
-        const year = date.getFullYear(); // Get the year
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Get the month (0-indexed, so add 1)
-        const day = String(date.getDate()).padStart(2, '0'); // Get the day
-    
-        return `${year}-${month}-${day}`; // Return in YYYY-MM-DD format
-    }
-    
     return (
         <Form>
             {/* Date picker */}
             <Form.Group className="mb-4">
-                <Form.Label>Today's Date</Form.Label>
-                <Form.Control name="date" type="date" value={formData.date ? formData.date.split('T')[0] : ''} onChange={handleChange} required/>
+                <Form.Label>Profile Start Date</Form.Label>
+                <Form.Control name="date" type="datetime-local" value={formData.date} onChange={handleChange} required/>
             </Form.Group>
             {/* NAME text input */}
             <Form.Group className="mb-4" controlId="formBasicEmail">
                 <Form.Label>Name</Form.Label>
                 <Form.Control type="text" name="name" placeholder="Enter name" value={formData.name}
-                            onChange={handleChange}/>
+                            onChange={handleChange} required/>
             </Form.Group>
             
             {/* ROW: Gender, Age, Species */}
@@ -278,6 +263,7 @@ const ProfileForm = ({formDataEdit, setFormDataEdit, onSubmit, handleClose, isEd
                             name="age"
                             value={formData.age}
                             onChange={handleChange}
+                            required
                             />
                             <InputGroup.Text id="basic-addon2">years old</InputGroup.Text>
                         </InputGroup>
@@ -338,6 +324,7 @@ const ProfileForm = ({formDataEdit, setFormDataEdit, onSubmit, handleClose, isEd
                                         e.preventDefault();
                                         handleTraitClick(trait);
                                     }}
+                                    required
                                     variant={formData.selectedTraits.includes(trait) ? 'primary' : 'outline-primary'}
                                     style={{
                                         padding: '10px 20px',
