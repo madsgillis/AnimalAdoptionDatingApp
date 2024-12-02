@@ -5,60 +5,37 @@ import CreateProfile from './create-profile';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Button from 'react-bootstrap/Button';
 import './admin.css'
+import useFetchData from './use-fetch-data';
 
 // icons
 import { Plus } from 'react-bootstrap-icons';
-import { MDBBtn, MDBInputGroup, MDBInput, MDBIcon } from 'mdb-react-ui-kit';
+import { MDBBtn, MDBInputGroup, MDBInput} from 'mdb-react-ui-kit';
 
   function Admin() {
+    // STATES FOR SHOWING DATA AND DISPLAYING TABLE
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
 
+    /* ===========SEARCH BAR==================== */
     // set and save search term to send to table:
     const [searchTerm, setSearchTerm] = useState(''); // State for the search term
 
     const handleSearchClick = (term) => {
         setSearchTerm(term); // Set search term when search button is clicked
     };
+    /* ========================================= */
 
-    /* search bar */
-    const [showSearchAlert, setShowSearchAlert] = useState(false);
-
-    /* fetching and posting data */
-    const [data, setData] = useState([]);
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                console.log("Fetching data from backend");
-                const response = await fetch('http://127.0.0.1:5000/admin', {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                console.log(response);
-                if (!response.ok) {
-                    throw new Error('Network did not respond');
-                }
-
-                // Parse response as JSON
-                const result = await response.json();
-                console.log("Fetched data:", result);
-                setData(result);
-
-            } catch (error) {
-                console.error('Error fetching data: ', error);
-            }
-        };
-
-        fetchData();
-    }, []);
-
+     /* =========== FETCH (GET) TABLE DATA ==================== */
+    const { data, error } = useFetchData('http://127.0.0.1:5000/admin');
+    if (error) {
+        return <div>Error: {error.message}</div>;
+    }
     if (data.length === 0) return <p>No data available.</p>;
-
+    /* ====================================================== */
+    
     return (
     <Container fluid="md" className="mb-3">
         <Row className="mb-5" style={{marginTop:'35px'}}>
