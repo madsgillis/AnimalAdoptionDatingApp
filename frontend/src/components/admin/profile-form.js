@@ -122,28 +122,33 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
         handleClose();
 
         try {
+            if (formData.photo instanceof File) {
+                // upload profile photo to server
+                const photoFormData = new FormData(); 
+                photoFormData.append('photo', formData.photo); // `formData.photo` should hold the selected file
 
-            // upload profile photo to server
-            const photoFormData = new FormData(); 
-            photoFormData.append('photo', formData.photo); // `formData.photo` should hold the selected file
-
-            const uploadResponse = await fetch('http://127.0.0.1:5000/upload', { 
-                method: 'POST', 
-                body: photoFormData,
-            });
-    
-            if (!uploadResponse.ok) {
-                console.error("Photo upload failed:", await uploadResponse.text());
-                return;
-            }
-    
-            const { file_url } = await uploadResponse.json(); // Get the uploaded file's URL
-    
-            // Step 2: Add photo URL to the rest of the form data
-            const finalFormData = { 
-                ...formData,  // Spread the existing `formData` (excluding the file itself)
-                photo: file_url, // Replace the file object with the uploaded file's URL
-            };
+                const uploadResponse = await fetch('http://127.0.0.1:5000/upload', { 
+                    method: 'POST', 
+                    body: photoFormData,
+                });
+        
+                if (!uploadResponse.ok) {
+                    console.error("Photo upload failed:", await uploadResponse.text());
+                    return;
+                }
+        
+                const { file_url } = await uploadResponse.json(); // Get the uploaded file's URL
+        
+                // Step 2: Add photo URL to the rest of the form data
+                const finalFormData = { 
+                    ...formData,  // Spread the existing `formData` (excluding the file itself)
+                    photo: file_url, // Replace the file object with the uploaded file's URL
+                };
+            } else  {
+                const finalFormData = {
+                    ...formData
+                }
+            
 
             console.info("here is date logged into form data:", formData.date)
             const response = await fetch('http://127.0.0.1:5000/admin/edit-profile', {
@@ -161,7 +166,7 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
                 console.error("Error response body: ", errorText);
                 return;
             }
-
+        
             const data = await response.json();
             console.log("Profile updated successfully:", data.message);
 
@@ -184,9 +189,11 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
             } else {
                 console.error("Failed to edit profile.");
             }
+            }
         } catch (error) {
             console.error("There was an error: ", error);
         }
+    
     };
     /* ==================================================================== */
 
