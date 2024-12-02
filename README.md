@@ -1,51 +1,47 @@
 # AnimalAdoptionDatingApp
 
-Here's an example of a well-structured GitHub README file for project instructions:
-
----
-
-# Project Name
-
 ## Description
-A brief description of what your project does and its purpose.
+This is a dating web application for animal adoption. Users can browse through profiles and find animals that match their criteria. 
 
 ## Table of Contents
 - Installation
 - Usage
-- Contributing
-- License
-- Contact
+- Features
 
 ## Installation
 Step-by-step instructions on how to get the development environment running.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/yourproject.git
+git clone (https://github.com/username/AnimalAdoptionDatingApp.git)
 
 # Navigate to the project directory
-cd yourproject
+cd AnimalAdoptionDatingApp
 
-# Install dependencies
+# Install dependencies on front end React
+cd frontend
 npm install
+
+# Install dependencies on backend Flask
+cd backend
+pip install -r requirements.txt
 ```
 
 ## Usage
 Instructions and examples for using the project. Include screenshots or code snippets if applicable.
 
 ```bash
-# Run the application
+# Run the application on frontend
+cd frontend
 npm start
+
+# Run application on backend
+cd backend
+flask run
 ```
 
-## Contributing
-Guidelines for contributing to the project. This can include how to report issues, submit pull requests, and coding standards.
+## Features
 
-## License
-Information about the project's license.
-
-## Contact
-Contact information for the project maintainer(s).
 
 ---
 
