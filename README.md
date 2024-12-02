@@ -37,6 +37,7 @@ npm start
 
 # Run application on backend
 cd backend
+source venv/bin/activate
 flask run
 ```
 
