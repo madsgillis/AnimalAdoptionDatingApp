@@ -144,12 +144,11 @@ const AdminTable = ({data, searchTerm}) =>{
                                             <tr key={animal.animal_id}>
                                                 <td>{animal.animal_id}</td>
                                                 <td>{animal.animal_name}</td>
-                                                <td>
-                                                    {imageMapping[animal.photo] ? (
-                                                        <img src={imageMapping[animal.photo]} alt={animal.animal_name} id="animalPhotos" />
+                                                <td>{animal.photo ? (
+                                                    <img style={{width:"100px", height:"100px", objectFit:"cover"}}src={animal.photo} alt={animal.animal_name} />
                                                     ) : (
-                                                        <span>No Image</span> // display text if no image is found
-                                                    )}
+                                                        <span>No Photo Uploaded</span>
+                                                    )}        
                                                 </td>
                                                 <td>{animal.species}</td>
                                                 <td><StatusTag status={animal.availability} /></td>

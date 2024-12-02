@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, url_for
 from flask_cors import CORS
 import pymysql.cursors
 from datetime import datetime
@@ -29,7 +29,7 @@ CORS(app, resources={
 current_directory = os.getcwd()
 
 # Define the upload folder relative to the current directory
-UPLOAD_FOLDER = os.path.join(current_directory, 'uploads')
+UPLOAD_FOLDER = os.path.join(current_directory, 'static/uploads')
 # Create the 'uploads' directory if it doesn't exist
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -103,6 +103,7 @@ def get_admin_data():
         connection.close()
 
 
+# handles requests for uploading profile photo
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'photo' not in request.files:
@@ -115,7 +116,7 @@ def upload_file():
     if allowed_file(photo.filename):
         filename = secure_filename(photo.filename)  # Ensures the filename is safe
         photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        file_url = f"{request.url_root}{app.config['UPLOAD_FOLDER']}/{filename}"
+        file_url = url_for('static', filename='uploads/' + filename, _external=True)
         return jsonify({"file_url": file_url}), 200
     else:
         return jsonify({"error": "File type not allowed"}), 400
@@ -186,7 +187,7 @@ def create_profile():
                 animal_id = data['animal_id']
             else:
                 animal_id = None
-            
+
             # add each disposition for new animal profile
             for disp_desc in disposition:
                 disp_desc_query = "SELECT disp_id from Dispositions WHERE disp_desc = %s;"
@@ -226,6 +227,7 @@ def update_animal():
     disposition = list(set(animal_data.get('selectedTraits', [])))
     description = animal_data.get('description')
     formatted_date = datetime.strptime(date, '%Y-%m-%dT%H:%M')
+    photo = animal_data.get('photo')
     
     if not animal_id:
         return jsonify({"error": "No animal_id provided"}), 400  # Ensure animal_id is provided
@@ -261,10 +263,10 @@ def update_animal():
             sql_query = """
                 UPDATE Animals
                 SET animal_name = %s, age = %s, animal_sex = %s, description = %s,
-                    availability = %s, species = %s, date = %s
+                    availability = %s, species = %s, date = %s, photo = %s
                 WHERE animal_id = %s;
             """
-            cursor.execute(sql_query, (name, age, sex, description, avail_id, species_id, formatted_date, animal_id))
+            cursor.execute(sql_query, (name, age, sex, description, avail_id, species_id, formatted_date, photo, animal_id))
 
             # add each disposition for new animal profile, make sure only 1 of each
             for disp_desc in set(disposition):
@@ -311,27 +313,6 @@ def delete_profile(animal_id):
         return jsonify({"Error": str(e)}), 500
     finally:
         connection.close()
-
-# UPLOAD PROFILE PHOTO
-"""@app.route('/upload', methods=['POST'])
-def upload_file(animal_id):
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'})
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'})
-    if file:
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
-
-        # Insert file path into database
-        query = "INSERT INTO images (image_name, image_path) VALUES (%s, %s)"
-        cursor.execute(query, (filename, file_path))
-        db.commit()
-
-        return jsonify({'success': 'File uploaded successfully'})
-"""
 
 # Homepage
 @app.route('/')
