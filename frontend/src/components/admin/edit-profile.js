@@ -19,7 +19,8 @@ const EditProfile = ({handleClose, show, props, profileData}) => {
         age: '',
         selectedTraits: [],
         date: '',
-        description: ''
+        description: '',
+        photo: ''
     });
 
     // UPDATING FIELDS WITH PROFILE DATA FETCHED
@@ -37,7 +38,8 @@ const EditProfile = ({handleClose, show, props, profileData}) => {
                 age: profileData.age,
                 selectedTraits: profileData.dispositions,
                 date: profileData.date,
-                description: profileData.description
+                description: profileData.description,
+                photo: profileData.photo
             });
         } else {    // else empty form data
             setFormData({
@@ -50,7 +52,8 @@ const EditProfile = ({handleClose, show, props, profileData}) => {
                 age: '',
                 selectedTraits: [],
                 date: '',
-                description: ''
+                description: '',
+                photo: ''
             });
         }
     }, [profileData]);

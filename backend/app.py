@@ -2,6 +2,19 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pymysql.cursors
 from datetime import datetime
+from werkzeug.utils import secure_filename
+import os
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}  # Allowed file types
+
+
+def allowed_file(filename):
+    """
+    Checks if the file has an allowed extension.
+    :param filename: The name of the file being uploaded.
+    :return: True if the file is allowed, False otherwise.
+    """
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -11,6 +24,17 @@ CORS(app, resources={
         "allow_headers": ["Content-Type", "Accept"]
     }
 }) 
+
+# handling photo upload (local path on server holds photos)
+current_directory = os.getcwd()
+
+# Define the upload folder relative to the current directory
+UPLOAD_FOLDER = os.path.join(current_directory, 'uploads')
+# Create the 'uploads' directory if it doesn't exist
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+print(f"Upload folder is set to: {UPLOAD_FOLDER}")
 
 # Database configuration
 db_config = {
@@ -78,11 +102,29 @@ def get_admin_data():
     finally:
         connection.close()
 
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'photo' not in request.files:
+        return jsonify({"error": "No photo uploaded"}), 400
+
+    photo = request.files['photo']
+    if photo.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if allowed_file(photo.filename):
+        filename = secure_filename(photo.filename)  # Ensures the filename is safe
+        photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        file_url = f"{request.url_root}{app.config['UPLOAD_FOLDER']}/{filename}"
+        return jsonify({"file_url": file_url}), 200
+    else:
+        return jsonify({"error": "File type not allowed"}), 400
+
+
 @app.route('/admin/create-profile', methods=['POST'])
 def create_profile():
 
     animal_data = request.get_json()
-    #sex_char = ''
 
     if not animal_data:
         return jsonify({"error": "No data provided"}), 400
@@ -96,6 +138,7 @@ def create_profile():
     disposition = animal_data.get('selectedTraits')
     description = animal_data.get('description')
     formatted_date = datetime.strptime(date, '%Y-%m-%dT%H:%M')
+    photo = animal_data.get('photo')
 
     connection = db_connection()
     try:
@@ -126,24 +169,24 @@ def create_profile():
 
             # insert new animal profile into database
             sql_query = """
-                INSERT INTO Animals (date, animal_name, animal_sex, age, species, availability, description)
-                VALUES (%s, %s, %s, %s, %s, %s, %s);
+                INSERT INTO Animals (date, animal_name, animal_sex, age, species, availability, description, photo)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
                 """
-            cursor.execute(sql_query, (formatted_date, name, sex_char, age, species_id, avail_id, description))
+            cursor.execute(sql_query, (formatted_date, name, sex_char, age, species_id, avail_id, description, photo))
             connection.commit()
 
             # get ID for animal profile that was just created
             animal_query = """
                 SELECT animal_id FROM Animals WHERE date = %s AND animal_name = %s AND animal_sex = %s
-                AND age = %s AND species = %s AND availability = %s and description = %s;
+                AND age = %s AND species = %s AND availability = %s and description = %s AND photo = %s;
                 """
-            cursor.execute(animal_query, (formatted_date, name, sex_char, age, species_id, avail_id, description))
+            cursor.execute(animal_query, (formatted_date, name, sex_char, age, species_id, avail_id, description, photo))
             data = cursor.fetchone()
             if data:
                 animal_id = data['animal_id']
             else:
                 animal_id = None
-
+            
             # add each disposition for new animal profile
             for disp_desc in disposition:
                 disp_desc_query = "SELECT disp_id from Dispositions WHERE disp_desc = %s;"
@@ -268,6 +311,27 @@ def delete_profile(animal_id):
         return jsonify({"Error": str(e)}), 500
     finally:
         connection.close()
+
+# UPLOAD PROFILE PHOTO
+"""@app.route('/upload', methods=['POST'])
+def upload_file(animal_id):
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'})
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'})
+    if file:
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        # Insert file path into database
+        query = "INSERT INTO images (image_name, image_path) VALUES (%s, %s)"
+        cursor.execute(query, (filename, file_path))
+        db.commit()
+
+        return jsonify({'success': 'File uploaded successfully'})
+"""
 
 # Homepage
 @app.route('/')
