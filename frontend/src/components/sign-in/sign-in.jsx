@@ -20,7 +20,7 @@ function SignIn() {
 			event.preventDefault();
 
 		try {
-			const response = await fetch('/sign-in', {
+			const response = await fetch('http://127.0.0.1:5000/sign-in', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({user_name, password}),
@@ -70,7 +70,7 @@ function SignIn() {
 
 			<div className="text-center">
 				<p>
-					Not a member?
+					Not a member?{' '}
 					<Link to={"/sign-up"} className="link">
 						Register
 					</Link>
