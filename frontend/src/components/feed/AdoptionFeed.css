@@ -116,3 +116,38 @@
   .filter-controls .form-check {
     margin-bottom: 0.5rem;
   }
+
+  .comments-section {
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+  }
+
+  .comment {
+    padding: 0.5rem;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+  }
+
+  .comment:not(:last-child) {
+    margin-bottom: 0.5rem;
+  }
+
+  .comment p {
+    margin-bottom: 0;
+    word-break: break-word;
+  }
+
+  .comments-section .form-control {
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+  }
+
+  .comments-section .form-control:focus {
+    box-shadow: none;
+    border-color: #0d6efd;
+  }
+
+  .comments-section .btn-primary {
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+  }
