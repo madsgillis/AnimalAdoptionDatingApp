@@ -1,11 +1,63 @@
 from flask import Flask, jsonify, request, url_for
 from flask_cors import CORS
 import pymysql.cursors
-from datetime import datetime
+from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 import os
+import random  # Add this at the top with other imports
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}  # Allowed file types
 
+# Add these at the top of your file
+SAMPLE_SHELTERS = [
+    "Happy Tails Rescue",
+    "Paws & Claws Sanctuary",
+    "Forever Home Society",
+    "Second Chance Shelter",
+    "Loving Hearts Animal Center",
+    "Safe Haven Pet Rescue",
+    "Hope's Door Animal Shelter",
+    "Furry Friends Foundation",
+    "Rainbow Bridge Rescue",
+    "Guardian Angels Pet Home"
+]
+
+SAMPLE_COMMENTS = [
+    "Such a cutie! 😍",
+    "I would love to adopt!",
+    "Beautiful animal ❤️",
+    "How old are they?",
+    "Is this one still available?",
+    "Love the photos!",
+    "Perfect family pet",
+    "Those eyes! 🥺",
+    "Can't wait to meet them",
+    "What a sweetheart"
+]
+
+SAMPLE_AUTHORS = [
+    "John Doe",
+    "Jane Smith",
+    "Bob Wilson",
+    "Alice Johnson",
+    "Mike Brown",
+    "Sarah Davis",
+    "Tom Anderson",
+    "Emma Wilson",
+    "Chris Martin",
+    "Lisa Thompson"
+]
+
+SAMPLE_GENDERS = [
+    "Male",
+    "Female"
+]
+
+SAMPLE_ADOPTION_STATUS = [
+    "Available",
+    "On Hold",
+    "Adopted",
+    "Currently Unavailable"
+]
 
 def allowed_file(filename):
     """
@@ -318,6 +370,73 @@ def delete_profile(animal_id):
 @app.route('/')
 def index():
     return ""
+
+@app.route('/api/adoption-feed', methods=['GET'])
+def get_adoption_feed():
+    connection = db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    a.animal_id,
+                    a.animal_name,
+                    a.photo,
+                    a.description,
+                    sp.species_desc as species
+                FROM Animals a
+                JOIN Species sp ON a.species = sp.species_id
+                ORDER BY a.animal_id DESC
+            """)
+            
+            animals = cursor.fetchall()
+            
+            # Generate random data for each animal
+            for animal in animals:
+                # Random likes count
+                animal['likes'] = random.randint(0, 50)
+                
+                # Random shelter
+                animal['shelter_name'] = random.choice(SAMPLE_SHELTERS)
+                
+                # Random gender
+                animal['gender'] = random.choice(SAMPLE_GENDERS)
+                
+                # Random adoption status
+                animal['adoption_status'] = random.choice(SAMPLE_ADOPTION_STATUS)
+                
+                # Generate random comments
+                num_comments = random.randint(0, 5)
+                
+                # Generate random dates within the last 30 days
+                def random_date():
+                    days_ago = random.randint(0, 30)
+                    date = datetime.now() - timedelta(days=days_ago)
+                    return date.strftime("%Y-%m-%d")
+                
+                animal['comments'] = [
+                    {
+                        "author": random.choice(SAMPLE_AUTHORS),
+                        "comment_text": random.choice(SAMPLE_COMMENTS),
+                        "created_at": random_date()
+                    }
+                    for _ in range(num_comments)
+                ]
+                
+                # Convert tags to array format expected by frontend
+                animal['tags'] = [
+                    animal['species'],
+                    'Adult',  # You might want to add an age category to your database
+                    animal['gender']
+                ]
+
+            print("Fetched animals:", animals)  # Debug print
+            return jsonify(animals)
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        connection.close()
 
 if __name__ == '__main__':
     app.run(debug=True)

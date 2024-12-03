@@ -4,9 +4,10 @@ import './AdoptionFeed.css';
 
 const AdoptionPost = ({ animal, onAddComment, onDeleteComment, onToggleLike, userLikes, onHidePost }) => {
     const [showComments, setShowComments] = useState(false);
-    const currentUser = "Current User"; // Replace with actual user authentication
+    const [newComment, setNewComment] = useState('');
+    const currentUser = "Current User"; // Or get this from your auth system
   
-    const isLiked = userLikes.includes(animal.id);
+    const isLiked = userLikes.includes(animal.animal_id);
 
     // Add this function to get status color
     const getStatusColor = (status) => {
@@ -21,6 +22,21 @@ const AdoptionPost = ({ animal, onAddComment, onDeleteComment, onToggleLike, use
             return 'danger';
         default:
             return 'primary';
+        }
+    };
+  
+    // Add this console.log to debug
+    console.log('Animal comments:', animal.comments);
+  
+    const handleSubmitComment = (e) => {
+        e.preventDefault();
+        if (newComment.trim()) {
+            onAddComment(animal.animal_id, {
+                author: currentUser,
+                comment_text: newComment,
+                created_at: new Date().toISOString()
+            });
+            setNewComment('');
         }
     };
   
@@ -46,20 +62,20 @@ const AdoptionPost = ({ animal, onAddComment, onDeleteComment, onToggleLike, use
               <div style={{ width: '48px', height: '48px' }} className="rounded-circle overflow-hidden">
                 <img
                   src={animal.photo}
-                  alt={animal.name}
+                  alt={animal.animal_name}
                   className="w-100 h-100 object-fit-cover"
                 />
               </div>
               <div>
-                <h5 className="mb-0">{animal.name}</h5>
-                <small className="text-muted">{animal.shelter}</small>
+                <h5 className="mb-0">{animal.animal_name}</h5>
+                <small className="text-muted">{animal.shelter_name}</small>
               </div>
             </div>
             <Badge 
-              bg={getStatusColor(animal.adoptionStatus)}
+              bg={getStatusColor(animal.adoption_status)}
               className="px-3 py-2 me-4"
             >
-              {animal.adoptionStatus}
+              {animal.adoption_status}
             </Badge>
           </div>
         </Card.Header>
@@ -68,7 +84,7 @@ const AdoptionPost = ({ animal, onAddComment, onDeleteComment, onToggleLike, use
           <div className="mb-3">
             <img
               src={animal.photo}
-              alt={`${animal.name}'s photo`}
+              alt={`${animal.animal_name}'s photo`}
               className="w-100 rounded"
               style={{ objectFit: 'cover', aspectRatio: '16/9' }}
             />
@@ -86,75 +102,62 @@ const AdoptionPost = ({ animal, onAddComment, onDeleteComment, onToggleLike, use
           </div>
         </Card.Body>
   
-        <Card.Footer className="d-flex justify-content-between">
-          <div className="d-flex align-items-center gap-2">
+        <Card.Footer>
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <div className="d-flex align-items-center gap-2">
+              <Button 
+                  variant={isLiked ? "primary" : "outline-primary"}
+                  onClick={() => onToggleLike(animal.animal_id)}
+                  className="like-button"
+              >
+                  <span>{isLiked ? '♥' : '♡'}</span>
+              </Button>
+              <span className="like-count">{animal.likes}</span>
+            </div>
             <Button 
-                variant={isLiked ? "primary" : "outline-primary"}
-                onClick={() => onToggleLike(animal.id)}
-                className="like-button"
+              variant="link" 
+              onClick={() => setShowComments(!showComments)}
+              className="text-decoration-none"
             >
-                <span>{isLiked ? '♥' : '♡'}</span>
+              {animal.comments?.length || 0} Comments
             </Button>
-            <span className="like-count">{animal.likes}</span>
           </div>
-          <Button 
-            variant="outline-secondary"
-            onClick={() => setShowComments(true)}
-          >
-            💬 {animal.comments.length}
-          </Button>
-          <Button variant="outline-success">
-            Share
-          </Button>
-        </Card.Footer>
-  
-        <Modal show={showComments} onHide={() => setShowComments(false)} size="lg">
-          <Modal.Header closeButton>
-            <Modal.Title>Comments for {animal.name}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="comments-section mb-4">
-              {animal.comments.map((comment, index) => (
-                <div key={index} className="comment p-3 border-bottom position-relative">
-                  <strong>{comment.author}</strong>
-                  <p className="mb-1">{comment.text}</p>
-                  <small className="text-muted">{comment.date}</small>
-                  {comment.author === currentUser && (
-                    <Button
-                      variant="link"
-                      className="position-absolute top-0 end-0 text-danger p-2"
-                      onClick={() => onDeleteComment(animal.id, index)}
-                    >
-                      ✕
-                    </Button>
-                  )}
+
+          {showComments && (
+            <div className="comments-section">
+              {animal.comments?.map((comment, index) => (
+                <div key={index} className="comment mb-2">
+                  <div className="d-flex justify-content-between">
+                    <strong>{comment.author}</strong>
+                    <small className="text-muted">
+                      {new Date(comment.created_at).toLocaleDateString()}
+                    </small>
+                  </div>
+                  <p className="mb-1">{comment.comment_text}</p>
                 </div>
               ))}
+
+              {/* Add comment form */}
+              <Form onSubmit={handleSubmitComment} className="mt-3">
+                <Form.Group className="d-flex gap-2">
+                  <Form.Control
+                    type="text"
+                    placeholder="Add a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                  />
+                  <Button 
+                    type="submit" 
+                    variant="primary"
+                    disabled={!newComment.trim()}
+                  >
+                    Post
+                  </Button>
+                </Form.Group>
+              </Form>
             </div>
-            <Form onSubmit={(e) => {
-              e.preventDefault();
-              const text = e.target.comment.value;
-              onAddComment(animal.id, {
-                author: "Current User", // Replace with actual user
-                text,
-                date: new Date().toLocaleDateString()
-              });
-              e.target.comment.value = '';
-            }}>
-              <Form.Group>
-                <Form.Control
-                  name="comment"
-                  as="textarea"
-                  rows={3}
-                  placeholder="Write a comment..."
-                />
-              </Form.Group>
-              <Button type="submit" className="mt-2">
-                Post Comment
-              </Button>
-            </Form>
-          </Modal.Body>
-        </Modal>
+          )}
+        </Card.Footer>
       </Card>
     );
 };
