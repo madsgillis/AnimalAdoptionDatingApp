@@ -20,7 +20,7 @@ function SignIn() {
 			event.preventDefault();
 
 		try {
-			const response = await fetch('http://127.0.0.1:5000/sign-in', {
+			const response = await fetch('https://animaladoptiondatingapp-production-ce4a.up.railway.app/sign-in', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({user_name, password}),

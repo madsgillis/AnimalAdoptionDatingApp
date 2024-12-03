@@ -29,7 +29,7 @@ import { MDBBtn, MDBInputGroup, MDBInput} from 'mdb-react-ui-kit';
     /* ========================================= */
 
      /* =========== FETCH (GET) TABLE DATA ==================== */
-    const { data, error } = useFetchData('http://127.0.0.1:5000/admin');
+    const { data, error } = useFetchData('https://animaladoptiondatingapp-production-ce4a.up.railway.app/admin');
     if (error) {
         return <div>Error: {error.message}</div>;
     }

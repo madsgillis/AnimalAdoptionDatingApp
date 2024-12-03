@@ -127,7 +127,7 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
                 const photoFormData = new FormData(); 
                 photoFormData.append('photo', formData.photo); // `formData.photo` should hold the selected file
 
-                const uploadResponse = await fetch('http://127.0.0.1:5000/upload', { 
+                const uploadResponse = await fetch('https://animaladoptiondatingapp-production-ce4a.up.railway.app/upload', { 
                     method: 'POST', 
                     body: photoFormData,
                 });
@@ -151,7 +151,7 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
             
 
             console.info("here is date logged into form data:", formData.date)
-            const response = await fetch('http://127.0.0.1:5000/admin/edit-profile', {
+            const response = await fetch('https://animaladoptiondatingapp-production-ce4a.up.railway.app/admin/edit-profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -200,7 +200,7 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
 
 
      /* ============== REFETCH PAGE AFTER EDIT ============================================== */
-    const { data, error } = useFetchData('http://127.0.0.1:5000/admin');
+    const { data, error } = useFetchData('https://animaladoptiondatingapp-production-ce4a.up.railway.app/admin');
 
     if (error) {
         return <div>Error: {error.message}</div>;
@@ -220,7 +220,7 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
             const photoFormData = new FormData(); 
             photoFormData.append('photo', formData.photo); // `formData.photo` should hold the selected file
 
-            const uploadResponse = await fetch('http://127.0.0.1:5000/upload', { 
+            const uploadResponse = await fetch('https://animaladoptiondatingapp-production-ce4a.up.railway.app/upload', { 
                 method: 'POST', 
                 body: photoFormData,
             });
@@ -238,7 +238,7 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
                 photo: file_url, // Replace the file object with the uploaded file's URL
             };
 
-            const response = await fetch('http://127.0.0.1:5000/admin/create-profile', {
+            const response = await fetch('https://animaladoptiondatingapp-production-ce4a.up.railway.app/admin/create-profile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
