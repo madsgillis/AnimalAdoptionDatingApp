@@ -20,6 +20,10 @@
     "rsuite": "^5.74.1",
     "web-vitals": "^2.1.4"
   },
+  "engines": {
+    "node": ">=23.x",
+    "npm": ">=9.5.1"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
