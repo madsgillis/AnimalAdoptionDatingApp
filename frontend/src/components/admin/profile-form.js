@@ -37,7 +37,8 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
             species: '',
             status: '',
             selectedTraits: [],
-            description: ''
+            description: '',
+            photo: ''
         });
     
         console.log("edited form data", formDataEdit);
@@ -63,6 +64,7 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
                 status: formDataEdit.availability || '',
                 selectedTraits: normalizedTraits || [],
                 description: formDataEdit.description || '',
+                photo: formDataEdit.photo || ''
             });
         }
     }, [mode, formDataEdit]);
@@ -113,7 +115,6 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
         setValidated(true);
     };
     
-
     /* ============ EDIT (PUT and GET) =================================== */
     const handleEdit = async (e) => {
 
@@ -121,13 +122,41 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
         handleClose();
 
         try {
+            if (formData.photo instanceof File) {
+                // upload profile photo to server
+                const photoFormData = new FormData(); 
+                photoFormData.append('photo', formData.photo); // `formData.photo` should hold the selected file
+
+                const uploadResponse = await fetch('http://127.0.0.1:5000/upload', { 
+                    method: 'POST', 
+                    body: photoFormData,
+                });
+        
+                if (!uploadResponse.ok) {
+                    console.error("Photo upload failed:", await uploadResponse.text());
+                    return;
+                }
+        
+                const { file_url } = await uploadResponse.json(); // Get the uploaded file's URL
+        
+                // Step 2: Add photo URL to the rest of the form data
+                const finalFormData = { 
+                    ...formData,  // Spread the existing `formData` (excluding the file itself)
+                    photo: file_url, // Replace the file object with the uploaded file's URL
+                };
+            } else  {
+                const finalFormData = {
+                    ...formData
+                }
+            
+
             console.info("here is date logged into form data:", formData.date)
             const response = await fetch('http://127.0.0.1:5000/admin/edit-profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(finalFormData),
             });
 
             // debug
@@ -137,7 +166,7 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
                 console.error("Error response body: ", errorText);
                 return;
             }
-
+        
             const data = await response.json();
             console.log("Profile updated successfully:", data.message);
 
@@ -152,16 +181,19 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
                     species: '',
                     status: '',
                     selectedTraits: [],
-                    description: ''}
+                    description: '',
+                    photo: ''}
                 );
                 console.log("profile updated successfully created!");
                 handleClose();
             } else {
                 console.error("Failed to edit profile.");
             }
+            }
         } catch (error) {
             console.error("There was an error: ", error);
         }
+    
     };
     /* ==================================================================== */
 
@@ -184,12 +216,34 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
         handleClose();
 
         try {
+            // upload profile photo to server
+            const photoFormData = new FormData(); 
+            photoFormData.append('photo', formData.photo); // `formData.photo` should hold the selected file
+
+            const uploadResponse = await fetch('http://127.0.0.1:5000/upload', { 
+                method: 'POST', 
+                body: photoFormData,
+            });
+    
+            if (!uploadResponse.ok) {
+                console.error("Photo upload failed:", await uploadResponse.text());
+                return;
+            }
+    
+            const { file_url } = await uploadResponse.json(); // Get the uploaded file's URL
+    
+            // Step 2: Add photo URL to the rest of the form data
+            const finalFormData = { 
+                ...formData,  // Spread the existing `formData` (excluding the file itself)
+                photo: file_url, // Replace the file object with the uploaded file's URL
+            };
+
             const response = await fetch('http://127.0.0.1:5000/admin/create-profile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(finalFormData),
             });
 
             // debug
@@ -212,7 +266,8 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
                     species: '',
                     status: '',
                     selectedTraits: [],
-                    description: ''}
+                    description: '',
+                    photo: ''}
                 );
                 console.log("New profile successfully created!");
                 handleClose();
@@ -306,7 +361,6 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
                             <option value="Dog">Dog</option>
                             <option value="Cat">Cat</option>
                             <option value="Bird">Bird</option>
-                            <option value="Other">Other</option>
                         </Form.Select>
                         <Form.Control.Feedback type="invalid">
                             Please select which species.
@@ -397,7 +451,8 @@ const ProfileForm = ({child, formDataEdit, handleClose, mode}) => {
             {/* Upload animal photo here */}
             <Form.Group controlId="formFile" className="mb-3">
                 <Form.Label>Profile Picture</Form.Label>
-                <Form.Control type="file" />
+                <Form.Control type="file" onChange={(e) => setFormData({ ...formData, photo: e.target.files[0] })
+            }/>
             </Form.Group>
             
             <Button  variant="primary" type="submit">

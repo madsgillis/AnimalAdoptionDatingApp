@@ -24,7 +24,7 @@ function App() {
                   <Link to={"/"} className='nav-link'>Home</Link>
                 </li>
                 <li className="nav-item">
-                  <Link to={"/admin"} className='nav-link'>Admin Page</Link>
+                  <Link to={"/admin"} className='nav-link'>Admin</Link>
                 </li>
                 <li className="nav-item">
                   <Link to={"/news-feed"} className='nav-link'>News Feed</Link>
