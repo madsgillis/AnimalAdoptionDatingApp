@@ -29,7 +29,10 @@ matched_with int,
 species int,
 breed int,
 availability int,
-disposition int,
+animal_sex char(1),
+age int,
+date datetime,
+description varchar(500),
 photo varchar(100),
 PRIMARY KEY (animal_id),
 FOREIGN KEY (listed_by) REFERENCES Users(user_id)
@@ -43,6 +46,15 @@ ON DELETE SET NULL,
 FOREIGN KEY (availability) REFERENCES Availability(avail_id)
 ON DELETE SET NULL,
 FOREIGN KEY (disposition) REFERENCES Dispositions(disp_id)
+ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS AnimalDispositions (
+animal_id int,
+disposition_id int,
+FOREIGN KEY (animal_id) REFERENCES Animals(animal_id)
+ON DELETE SET NULL,
+FOREIGN KEY (disposition_id) REFERENCES Dispositions(disp_id)
 ON DELETE SET NULL
 );
 

@@ -2,7 +2,7 @@
 //  1. pagination tutorial: https://react-table-v7-docs.netlify.app/docs/examples/pagination
 //  2. pagination -- https://medium.com/@thewidlarzgroup/react-table-7-sorting-filtering-pagination-and-more-6bc28af104d6
 
-import {React, useState} from 'react';
+import {React, useState, useEffect} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../../App.css';
@@ -13,27 +13,16 @@ import Row from 'react-bootstrap/Row';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Col from 'react-bootstrap/Col';
 
-// Import images
-import charlesImage from '../images/pexels-charles.jpg';
-import lilyImage from '../images/Lily.jpg';
-import FreddyImage from '../images/pexels-freddy.jpg';
-import lincolnImage from '../images/lincoln.jpg';
-
-// Map image names to image variables
-const imageMapping = {
-    'FreddyImage': FreddyImage,
-    'charlesImage': charlesImage,
-    'lilyImage': lilyImage,
-    'lincolnImage': lincolnImage,
-};
+// custom
+import EditProfile from './edit-profile';
+import AnimalProfile from './animal-profile';
 
 let totalProfiles = 0;
 
 // display main admin table
-function AdminTable({data, searchTerm}) {
-
+const AdminTable = ({data, searchTerm}) =>{
     // State to keep track of current page
-    const [itemsPerPage, setItemsPerPage] = useState(3);  // default is 3
+    const [itemsPerPage, setItemsPerPage] = useState(5);  // default is 5
     const [currentPage, setCurrentPage] = useState(1);
     
     // number of items per page, dependent on user drop down selection
@@ -64,7 +53,66 @@ function AdminTable({data, searchTerm}) {
 
     // profile count
     totalProfiles = data.length;
+
+    // handle opening of modal
+    const [show, setShow] = useState(false);
+    const handleShow = () => setShow(true);
+    const [modalType, setModalType] = useState(null); // 'view' or 'edit'
     
+    // store profile data for selected animal
+    const [selectedAnimal, setSelectedAnimal] = useState(null);
+    const handleEditShow = (animal, type) => {
+        setSelectedAnimal(animal); 
+        setModalType(type); // Set the data for the profile being edited
+        setShow(true); // Open the modal
+    };
+
+    // close modal for edit/create
+    function handleClose() {
+        setShow(false);
+        setSelectedAnimal(null); // Clear the selected animal when closing
+        setModalType(null);
+    }
+
+    /* 
+        DELETE ANIMAL PROFILE 
+    */
+    const DeleteProfile = async (animalId) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/admin/delete-profile/${animalId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            const result = await response.json();
+            if (response.ok) {
+                console.log(result.message);
+                setSuccessMessage(result.message); // confirm user
+            } else {
+                console.error(result.Error);
+                // Handle error (e.g., show error message)
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            // Handle network error
+        }
+    };
+
+    const [successMessage, setSuccessMessage] = useState('');
+    // update success message
+    useEffect(() => {
+        if (successMessage) {
+            // Show popup message
+            alert(successMessage);
+            // Clear the success message after showing the popup
+            setSuccessMessage('');
+        }
+    }, [successMessage]);
+
+
+     /* =========== FETCH (GET) TABLE DATA ==================== */
     return (
         <Container fluid>
             <div id="adminTableWrapper">
@@ -88,27 +136,43 @@ function AdminTable({data, searchTerm}) {
                                             <tr key={animal.animal_id}>
                                                 <td>{animal.animal_id}</td>
                                                 <td>{animal.animal_name}</td>
-                                                <td>
-                                                    {imageMapping[animal.photo] ? (
-                                                        <img src={imageMapping[animal.photo]} alt={animal.animal_name} id="animalPhotos" />
+                                                <td>{animal.photo ? (
+                                                    <img style={{width:"100px", height:"100px", objectFit:"cover"}}src={animal.photo} alt={animal.animal_name} />
                                                     ) : (
-                                                        <span>No Image</span> // display text if no image is found
-                                                    )}
+                                                        <span>No Photo Uploaded</span>
+                                                    )}        
                                                 </td>
                                                 <td>{animal.species}</td>
                                                 <td><StatusTag status={animal.availability} /></td>
                                                 <td>
-                                                    <button className="btn btn-info">
+                                                    <button onClick={() => handleEditShow(animal, 'view')} className="btn btn-info">
                                                         <i className="bi bi-eye"></i> View
                                                     </button>
+                                                    {modalType === 'view' && selectedAnimal && (
+                                                        <AnimalProfile 
+                                                            selectedAnimal={selectedAnimal}
+                                                            show={show} 
+                                                            onHide={handleClose}
+                                                            handleClose={handleClose} 
+                                                        />
+                                                    )}
                                                 </td>
                                                 <td>
-                                                    <button className="btn btn-primary">
+                                                    <button onClick={() => handleEditShow(animal, 'edit')}
+                                                     className="btn btn-primary" id="openProfile">
                                                         <i className="bi bi-pencil"></i> Edit
                                                     </button>
+                                                    {modalType === 'edit' && selectedAnimal && (
+                                                        <EditProfile
+                                                            profileData={selectedAnimal}
+                                                            show={show} onHide={handleClose} handleClose={handleClose} 
+                                                            title="Edit Profile"
+                                                            id='editProfileButtonElement'>
+                                                        </EditProfile>
+                                                    )}
                                                 </td>
                                                 <td>
-                                                    <button className="btn btn-danger">
+                                                    <button className="btn btn-danger" onClick={() => DeleteProfile(animal.animal_id)}>
                                                         <i className="bi bi-trash"></i> Delete
                                                     </button>
                                                 </td>

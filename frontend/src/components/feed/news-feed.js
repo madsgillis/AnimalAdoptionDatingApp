@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Collapse } from 'react-bootstrap';
 import './AdoptionFeed.css';
 import AdoptionPost from './adoption-post';
@@ -6,37 +6,9 @@ import lunaImage from '../images/luna.jpg';
 import whiskersImage from '../images/whiskers.jpg';
 
 const AdoptionFeed = () => {
-  const [animals, setAnimals] = useState([
-    {
-      id: 1,
-      name: "Luna",
-      shelter: "Happy Paws Shelter",
-      description: "Luna is a friendly 2-year-old Golden Retriever looking for her forever home. She loves playing fetch and cuddling!",
-      tags: ["Dog", "Golden Retriever", "Female", "Young"],
-      likes: 10,
-      comments: [
-        {
-          author: "John Doe",
-          text: "Such a beautiful dog!",
-          date: "2024-03-20"
-        }
-      ],
-      photo: lunaImage,
-      adoptionStatus: "Available"
-    },
-    {
-      id: 2,
-      name: "Whiskers",
-      shelter: "Feline Friends Rescue",
-      description: "Meet Whiskers, a calm and affectionate 3-year-old tabby cat. He's great with children and other pets.",
-      tags: ["Cat", "Tabby", "Male", "Adult"],
-      likes: 7,
-      comments: [],
-      photo: whiskersImage,
-      adoptionStatus: "On Hold"
-    }
-  ]);
-
+  const [animals, setAnimals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [userLikes, setUserLikes] = useState([]);
   const [hiddenPosts, setHiddenPosts] = useState([]);
 
@@ -55,6 +27,49 @@ const AdoptionFeed = () => {
 
   const [showFilters, setShowFilters] = useState(false);
 
+  useEffect(() => {
+    const fetchAnimals = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://127.0.0.1:5000/api/adoption-feed');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch animals');
+        }
+
+        const data = await response.json();
+        console.log('Fetched animals:', data);  // Debug log
+        setAnimals(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching animals:', err);
+        setError('Failed to load animals. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnimals();
+  }, []);  // Empty dependency array means this runs once when component mounts
+
+  if (loading) {
+    return (
+      <Container className="py-4 text-center">
+        <h1>Adoption Feed</h1>
+        <div>Loading animals...</div>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container className="py-4 text-center">
+        <h1>Adoption Feed</h1>
+        <div className="text-danger">{error}</div>
+      </Container>
+    );
+  }
+
   const handleFilterChange = (event) => {
     const { name, checked } = event.target;
     setFilters(prev => ({
@@ -64,18 +79,18 @@ const AdoptionFeed = () => {
   };
 
   const filteredAnimals = animals.filter(animal => {
-    const animalType = animal.tags[0].toLowerCase();
-    const gender = animal.tags[2].toLowerCase();
-    const status = animal.adoptionStatus.toLowerCase().replace(/\s+/g, '');
+    const animalType = animal.species.toLowerCase();
+    const gender = animal.gender.toLowerCase();
+    const status = animal.adoption_status.toLowerCase().replace(/\s+/g, '');
     
     return filters[animalType] && 
            filters[gender] && 
-           filters[status.toLowerCase()];
+           filters[status];
   });
 
   const handleAddComment = (animalId, newComment) => {
     setAnimals(animals.map(animal => {
-      if (animal.id === animalId) {
+      if (animal.animal_id === animalId) {
         return {
           ...animal,
           comments: [...animal.comments, newComment]
@@ -87,7 +102,7 @@ const AdoptionFeed = () => {
 
   const handleDeleteComment = (animalId, commentIndex) => {
     setAnimals(animals.map(animal => {
-      if (animal.id === animalId) {
+      if (animal.animal_id === animalId) {
         const updatedComments = [...animal.comments];
         updatedComments.splice(commentIndex, 1);
         return {
@@ -100,6 +115,19 @@ const AdoptionFeed = () => {
   };
 
   const handleToggleLike = (animalId) => {
+    setAnimals(prevAnimals =>
+      prevAnimals.map(animal => {
+        if (animal.animal_id === animalId) {
+          const isCurrentlyLiked = userLikes.includes(animalId);
+          return {
+            ...animal,
+            likes: isCurrentlyLiked ? animal.likes - 1 : animal.likes + 1
+          };
+        }
+        return animal;
+      })
+    );
+
     setUserLikes(prevLikes => {
       if (prevLikes.includes(animalId)) {
         return prevLikes.filter(id => id !== animalId);
@@ -107,20 +135,6 @@ const AdoptionFeed = () => {
         return [...prevLikes, animalId];
       }
     });
-
-    setAnimals(prevAnimals => 
-      prevAnimals.map(animal => {
-        if (animal.id === animalId) {
-          return {
-            ...animal,
-            likes: userLikes.includes(animalId) 
-              ? animal.likes - 1 
-              : animal.likes + 1
-          };
-        }
-        return animal;
-      })
-    );
   };
 
   const handleHidePost = (animalId) => {
@@ -254,10 +268,10 @@ const AdoptionFeed = () => {
       <Row>
         <Col lg={8} className="mx-auto">
           {filteredAnimals
-            .filter(animal => !hiddenPosts.includes(animal.id))
+            .filter(animal => !hiddenPosts.includes(animal.animal_id))
             .map((animal) => (
               <AdoptionPost 
-                key={animal.id} 
+                key={animal.animal_id} 
                 animal={animal}
                 onAddComment={handleAddComment}
                 onDeleteComment={handleDeleteComment}
