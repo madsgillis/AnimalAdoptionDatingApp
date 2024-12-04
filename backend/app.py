@@ -71,7 +71,7 @@ def allowed_file(filename):
 app = Flask(__name__)
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:3000"],
+        "origins": ["https://animaladoptiondatingapp-production.up.railway.app"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Accept"]
     }
@@ -86,6 +86,7 @@ UPLOAD_FOLDER = os.path.join(current_directory, 'static/uploads')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['PREFERRED_URL_SCHEME'] = 'https'
 print(f"Upload folder is set to: {UPLOAD_FOLDER}")
 
 # Database configuration

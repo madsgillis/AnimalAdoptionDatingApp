@@ -36,7 +36,7 @@ export default function AnimalCards() {
 
     // Fetching animal data (ALL PROFILES)
     useEffect(() => {
-        fetch('http://127.0.0.1:5000/admin')
+        fetch('https://animaladoptiondatingapp-production-ce4a.up.railway.app/admin')
             .then((response) => response.json())
             .then((data) => {
                 setData(data);

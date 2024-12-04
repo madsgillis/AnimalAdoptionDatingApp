@@ -14,7 +14,7 @@ function Admin() {
         const fetchData = async () => {
             try {
                 console.log("Fetching data from backend");
-                const response = await fetch('http://127.0.0.1:5000/admin', {
+                const response = await fetch('https://animaladoptiondatingapp-production-ce4a.up.railway.app/admin', {
                     headers: {
                         'Content-Type': 'application/json'
                     }
