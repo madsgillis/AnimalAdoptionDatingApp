@@ -31,14 +31,14 @@ pip install -r requirements.txt
 Instructions and examples for using the project. Include screenshots or code snippets if applicable.
 
 ```bash
-# Run the application on frontend
-cd frontend
-npm start
-
 # Run application on backend
 cd backend
 source venv/bin/activate
 flask run
+
+# Run the application on frontend
+cd frontend
+npm start
 ```
 
 ## Features
