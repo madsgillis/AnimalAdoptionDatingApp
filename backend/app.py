@@ -71,7 +71,7 @@ def allowed_file(filename):
 app = Flask(__name__)
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:3000"],
+        "origins": ["https://animaladoptiondatingapp-production.up.railway.app/"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Accept"]
     }
