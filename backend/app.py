@@ -86,6 +86,7 @@ UPLOAD_FOLDER = os.path.join(current_directory, 'static/uploads')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['PREFERRED_URL_SCHEME'] = 'https'
 print(f"Upload folder is set to: {UPLOAD_FOLDER}")
 
 # Database configuration
